@@ -8,6 +8,7 @@ import pending from '../../public/pending.png'
 import edit from '../../public/edit.png'
 import destroy from '../../public/destroy.png'
 import pay from '../../public/pay.png'
+import blocked from '../../public/blocked.png'
 import confirm from '../../public/confirm.png'
 import cancel from '../../public/cancel.png'
 import Link from 'next/link';
@@ -34,6 +35,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
         setCurrent(details.slice(0, slash))
         setLast(details.slice(slash + 3))
         setRecurrent(recurrentDebit)
+        setButton(false)
     }
     const [pay2, setPay2] = useState(false)
     const handlePay2 = () => {
@@ -93,13 +95,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
     const [option, setOption] = useState(payment[0])
     const handleOption = (e) => {
         setOption(e.target.value)
-        if (parseFloat(e.target.value) <= 0) {
-            setButton(false)
-        } else if (e.target.value !== '') {
-            setButton(true)
-        } else {
-            setButton(false)
-        }
+        setButton(true)
     }
 
     const [recurrent, setRecurrent] = useState(recurrentDebit)
@@ -144,7 +140,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                     {!options && !remove && !edit2 &&
                         <div onClick={handleOptions} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md">
                             <div className="w-28 flex flex-col justify-center items-center">
-                                <Image src={debit} width={40} height={40} />
+                                <Image src={debit} width={40} height={40} alt='pagamento no débito' />
                                 <div className="font-semibold">Dia {details}</div>
                             </div>
                             <div className="w-4/6">
@@ -156,11 +152,11 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                     {options && !remove && !edit2 &&
                         <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
                             <div onClick={handleEdit2}>
-                                <Image className='mx-auto' src={edit} width={40} height={40} />
+                                <Image className='mx-auto' src={edit} width={40} height={40} alt='editar pagamento' />
                                 <span className='w-[40px] text-sm text-center'>Editar</span>
                             </div>
                             <div onClick={handleRemove}>
-                                <Image className='mx-auto' src={destroy} width={40} height={40} />
+                                <Image className='mx-auto' src={destroy} width={40} height={40} alt='deletar pagamento' />
                                 <span className='w-[40px] text-sm text-center'>Excluir</span>
                             </div>
                         </div>
@@ -171,17 +167,17 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                 Excluir?
                             </div>
                             <div onClick={() => deleteDebit(id, paymentId, formValue)} className='duration-300 hover:-translate-y-2'>
-                                <Image className='mx-auto' src={confirm} width={40} height={40} />
+                                <Image className='mx-auto' src={confirm} width={40} height={40} alt='confirmar deleção' />
                             </div>
                             <div className='duration-300 hover:-translate-y-2' onClick={handleRemove}>
-                                <Image className='mx-auto' src={cancel} width={40} height={40} />
+                                <Image className='mx-auto' src={cancel} width={40} height={40} alt='cancelar deleção' />
                             </div>
                         </div>
                     }
                     {!options && !remove && edit2 &&
                         <div onMouseLeave={allOff} className="w-11/12 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 mx-auto shadow-md select-none">
                             <form action={(formData) => {
-                                editDebit(id, recurrent, formData)
+                                editDebit(id, recurrent, formData, paymentId)
                             }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>
                                 <div className='flex flex-col px-10 mb-5'>
                                     <label className='mb-2 text-sm' htmlFor="name">Descrição</label>
@@ -195,9 +191,9 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                     <div className='flex flex-col px-10 mb-5'>
                                         <label className='mb-2 text-sm' htmlFor="option">Forma de pagamento</label>
                                         <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option" value={option}>
-                                            <option defaultValue={option} hidden>{option}</option>
+                                            <option defaultValue={option} hidden>{payment[0]}</option>
                                             {debitOptions.filter(e => e.value >= parseFloat(useThisValue)).filter(e => e.id !== paymentId).map(e =>
-                                                <option value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                                                <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
                                             )}
                                         </select>
                                     </div>
@@ -215,13 +211,13 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                     {button &&
                                         < button className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:invert">
                                             <div className='invert mx-auto'>
-                                                <Image src={confirm} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                                <Image src={confirm} alt='confirmar' width={50} height={50} className='invert opacity-30' />
                                             </div>
                                         </button>
                                     }
                                     <button onClick={handleEdit2} className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
                                         <div className='invert mx-auto'>
-                                            <Image src={cancel} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                            <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
                                         </div>
                                     </button>
                                 </div>
@@ -236,7 +232,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                     {!options && !remove && !edit2 &&
                         <div onClick={handleOptions} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md">
                             <div className="w-28 flex flex-col justify-center items-center">
-                                <Image src={credit} width={40} height={40} />
+                                <Image src={credit} width={40} height={40} alt='pagamento no crédito' />
                                 <div className="font-semibold">Dia {details}</div>
                             </div>
                             <div className="w-4/6">
@@ -248,11 +244,11 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                     {options && !remove && !edit2 &&
                         <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
                             <div onClick={handleEdit2}>
-                                <Image className='mx-auto' src={edit} width={40} height={40} />
+                                <Image className='mx-auto' src={edit} width={40} height={40} alt='editar pagamento' />
                                 <span className='w-[40px] text-sm text-center'>Editar</span>
                             </div>
                             <div onClick={handleRemove}>
-                                <Image className='mx-auto' src={destroy} width={40} height={40} />
+                                <Image className='mx-auto' src={destroy} width={40} height={40} alt='deletar pagamento' />
                                 <span className='w-[40px] text-sm text-center'>Excluir</span>
                             </div>
                         </div>
@@ -263,17 +259,17 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                 Excluir?
                             </div>
                             <div onClick={() => deleteCredit(id, paymentId, formValue)} className='duration-300 hover:-translate-y-2'>
-                                <Image className='mx-auto' src={confirm} width={40} height={40} />
+                                <Image className='mx-auto' src={confirm} width={40} height={40} alt='confirmar deleção' />
                             </div>
                             <div className='duration-300 hover:-translate-y-2' onClick={handleRemove}>
-                                <Image className='mx-auto' src={cancel} width={40} height={40} />
+                                <Image className='mx-auto' src={cancel} width={40} height={40} alt='cancelar deleção' />
                             </div>
                         </div>
                     }
                     {!options && !remove && edit2 &&
                         <div onMouseLeave={allOff} className="w-11/12 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 mx-auto shadow-md select-none">
                             <form action={(formData) => {
-                                editCredit(id, formData)
+                                editCredit(id, formData, paymentId)
                             }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>
                                 <div className='flex flex-col px-10 mb-5'>
                                     <label className='mb-2 text-sm' htmlFor="name">Descrição</label>
@@ -287,9 +283,9 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                     <div className='flex flex-col px-10 mb-5'>
                                         <label className='mb-2 text-sm' htmlFor="option">Forma de pagamento</label>
                                         <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option" value={option}>
-                                            <option defaultValue={option} hidden>{option}</option>
+                                            <option defaultValue={option} hidden>{payment[0]}</option>
                                             {creditOptions.filter(e => e.value >= parseFloat(useThisValue)).filter(e => e.id !== paymentId).map(e =>
-                                                <option value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                                                <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
                                             )}
                                         </select>
                                     </div>
@@ -303,13 +299,13 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                     {button &&
                                         <button className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:invert">
                                             <div className='invert mx-auto'>
-                                                <Image src={confirm} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                                <Image src={confirm} alt='confirmar' width={50} height={50} className='invert opacity-30' />
                                             </div>
                                         </button>
                                     }
                                     <button onClick={handleEdit2} className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
                                         <div className='invert mx-auto'>
-                                            <Image src={cancel} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                            <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
                                         </div>
                                     </button>
                                 </div>
@@ -319,14 +315,13 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                 </>
             }
 
-
             {
                 type === 'installment' &&
                 <>
                     {!options && !remove && !edit2 &&
                         <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md">
                             <div className="w-28 flex flex-col justify-center items-center">
-                                <Image src={credit} width={40} height={40} />
+                                <Image src={credit} width={40} height={40} alt='parcelamento' />
                                 <div className="font-semibold">{details}</div>
                             </div>
                             <div className="w-4/6">
@@ -338,11 +333,11 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                     {options && !remove && !edit2 &&
                         <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
                             <div onClick={handleEdit2}>
-                                <Image className='mx-auto' src={edit} width={40} height={40} />
+                                <Image className='mx-auto' src={edit} width={40} height={40} alt='editar parcelamento' />
                                 <span className='w-[40px] text-sm text-center'>Editar</span>
                             </div>
                             <div onClick={handleRemove}>
-                                <Image className='mx-auto' src={destroy} width={40} height={40} />
+                                <Image className='mx-auto' src={destroy} width={40} height={40} alt='deletar parcelamento' />
                                 <span className='w-[40px] text-sm text-center'>Excluir</span>
                             </div>
                         </div>
@@ -353,17 +348,17 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                 Excluir?
                             </div>
                             <div onClick={() => deleteInstallment(id, paymentId, formValue, last)} className='duration-300 hover:-translate-y-2'>
-                                <Image className='mx-auto' src={confirm} width={40} height={40} />
+                                <Image className='mx-auto' src={confirm} width={40} height={40} alt='confirmar deleção' />
                             </div>
                             <div className='duration-300 hover:-translate-y-2' onClick={handleRemove}>
-                                <Image className='mx-auto' src={cancel} width={40} height={40} />
+                                <Image className='mx-auto' src={cancel} width={40} height={40} alt='cancelar deleção' />
                             </div>
                         </div>
                     }
                     {!options && !remove && edit2 &&
                         <div onMouseLeave={allOff} className="w-11/12 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 mx-auto shadow-md select-none">
                             <form action={(formData) => {
-                                editInstallment(id, formData)
+                                editInstallment(id, formData, paymentId)
                             }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>
                                 <div className='flex flex-col px-10 mb-5'>
                                     <label className='mb-2 text-sm' htmlFor="name">Descrição</label>
@@ -384,9 +379,9 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                     <div className='flex flex-col px-10 mb-5'>
                                         <label className='mb-2 text-sm' htmlFor="option">Forma de pagamento</label>
                                         <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option" value={option}>
-                                            <option defaultValue={option} hidden>{option}</option>
+                                            <option defaultValue={option} hidden>{payment[0]}</option>
                                             {creditOptions.filter(e => parseFloat(e.value) >= parseFloat(useThisValue) * parseFloat(last)).filter(e => e.id !== paymentId).map(e =>
-                                                <option value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                                                <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
                                             )}
                                         </select>
                                     </div>
@@ -397,13 +392,13 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                     {button && current <= last &&
                                         <button className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:invert">
                                             <div className='invert mx-auto'>
-                                                <Image src={confirm} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                                <Image src={confirm} alt='confirmar' width={50} height={50} className='invert opacity-30' />
                                             </div>
                                         </button>
                                     }
                                     <button onClick={handleEdit2} className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
                                         <div className='invert mx-auto'>
-                                            <Image src={cancel} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                            <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
                                         </div>
                                     </button>
                                 </div>
@@ -419,7 +414,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                     {!options && !remove && !edit2 && !pay2 &&
                         <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md">
                             <div className="w-28 flex flex-col justify-center items-center">
-                                <Image src={pending} width={40} height={40} />
+                                <Image src={pending} width={40} height={40} alt='pagamento pendente' />
                                 <div className="font-semibold">Dia {details}</div>
                             </div>
                             <div className="w-4/6">
@@ -431,15 +426,22 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                     {options && !remove && !edit2 && !pay2 &&
                         <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
                             <div onClick={handleEdit2}>
-                                <Image className='mx-auto' src={edit} width={40} height={40} />
+                                <Image className='mx-auto' src={edit} width={40} height={40} alt='editar pagamento' />
                                 <span className='w-[40px] text-sm text-center'>Editar</span>
                             </div>
-                            <div onClick={handlePay2}>
-                                <Image className='mx-auto' src={pay} width={40} height={40} />
-                                <span className='w-[40px] text-sm text-center'>Pagar</span>
-                            </div>
+                            {parseFloat(useThisValue) <= maxResource ?
+                                <div onClick={handlePay2}>
+                                    <Image className='mx-auto' src={pay} width={40} height={40} alt='sinalizar pagamento' />
+                                    <span className='w-[40px] text-sm text-center'>Pagar</span>
+                                </div>
+                                :
+                                <div>
+                                    <Image className='mx-auto' src={blocked} width={40} height={40} alt='não é possível sinalizar pagamento' />
+                                    <span className='w-[40px] text-sm text-center'>Pagar</span>
+                                </div>
+                            }
                             <div onClick={handleRemove}>
-                                <Image className='mx-auto' src={destroy} width={40} height={40} />
+                                <Image className='mx-auto' src={destroy} width={40} height={40} alt='deletar pagamento pendente' />
                                 <span className='w-[40px] text-sm text-center'>Excluir</span>
                             </div>
                         </div>
@@ -450,16 +452,16 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                 Excluir?
                             </div>
                             <div onClick={() => deletePending(id)} className='duration-300 hover:-translate-y-2'>
-                                <Image className='mx-auto' src={confirm} width={40} height={40} />
+                                <Image className='mx-auto' src={confirm} width={40} height={40} alt='confirmar deleção' />
                             </div>
                             <div className='duration-300 hover:-translate-y-2' onClick={handleRemove}>
-                                <Image className='mx-auto' src={cancel} width={40} height={40} />
+                                <Image className='mx-auto' src={cancel} width={40} height={40} alt='cancelar deleção' />
                             </div>
                         </div>
                     }
                     {!options && !remove && !edit2 && pay2 &&
                         <div className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
-                            {parseFloat(useThisValue) <= maxResource ?
+                            {/* {parseFloat(useThisValue) <= maxResource ?
                                 <div className='flex flex-col px-10 my-5'>
                                     <label className='mb-2 text-sm' htmlFor="option">Forma de pagamento</label>
                                     <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option" value={option}>
@@ -470,18 +472,27 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                     </select>
                                 </div>
                                 : parseFloat(useThisValue) > 0 && parseFloat(useThisValue) > maxResource && <p className="px-10 text-sm my-5">Você não possui recursos disponíveis para este pagamento.</p>
-                            }
+                            } */}
+                            <div className='flex flex-col px-10 my-5'>
+                                <label className='mb-2 text-sm' htmlFor="option">Forma de pagamento</label>
+                                <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option" value={option}>
+                                    <option defaultValue={'Selecione...'} hidden>Selecione...</option>
+                                    {debitOptions.filter(e => e.value >= parseFloat(useThisValue)).map(e =>
+                                        <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                                    )}
+                                </select>
+                            </div>
                             <div className='flex w-full justify-end pr-10'>
                                 {button && parseFloat(useThisValue) <= maxResource &&
                                     <button className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:invert">
                                         <div className='invert mx-auto'>
-                                            <Image src={confirm} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                            <Image src={confirm} alt='confirmar' width={50} height={50} className='invert opacity-30' />
                                         </div>
                                     </button>
                                 }
                                 <button onClick={handlePay2} className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
                                     <div className='invert mx-auto'>
-                                        <Image src={cancel} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                        <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
                                     </div>
                                 </button>
                             </div>
@@ -508,13 +519,13 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                     {button &&
                                         <button className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:invert">
                                             <div className='invert mx-auto'>
-                                                <Image src={confirm} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                                <Image src={confirm} alt='confirmar' width={50} height={50} className='invert opacity-30' />
                                             </div>
                                         </button>
                                     }
                                     <button onClick={handleEdit2} className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
                                         <div className='invert mx-auto'>
-                                            <Image src={cancel} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                            <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
                                         </div>
                                     </button>
                                 </div>

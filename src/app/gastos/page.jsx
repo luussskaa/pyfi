@@ -3,7 +3,6 @@ import { auth } from "@clerk/nextjs";
 import ExpenseItem from "@/components/ExpenseItem";
 import ExpenseCreator from "@/components/ExpenseCreator";
 import { redirect } from "next/navigation";
-import { de } from "translate-google/languages";
 
 async function addDebit(rec, formData) {
 
@@ -183,7 +182,7 @@ async function deletePending(id) {
 
 }
 
-async function editDebit(id, rec, formData) {
+async function editDebit(id, rec, formData, oldPaymentMethodId) {
 
     'use server'
 
@@ -194,6 +193,16 @@ async function editDebit(id, rec, formData) {
     const details = formData.get('day')
     const paymentId = formData.get('option')
     const recurrent = rec ? 'recurrent' : null
+
+    const oldExpense = await xataClient.db.Expenses.read(id)
+
+    await xataClient.db.Resources.update(oldPaymentMethodId, {
+        value: { $increment: parseFloat(oldExpense.value) }
+    })
+
+    await xataClient.db.Resources.update(paymentId, {
+        value: { $decrement: parseFloat(value) }
+    })
 
     await xataClient.db.Expenses.update(id, {
         name,
@@ -207,7 +216,7 @@ async function editDebit(id, rec, formData) {
 
 }
 
-async function editCredit(id, formData) {
+async function editCredit(id, formData, oldPaymentMethodId) {
 
     'use server'
 
@@ -217,6 +226,16 @@ async function editCredit(id, formData) {
     const value = formData.get('value')
     const details = formData.get('day')
     const paymentId = formData.get('option')
+
+    const oldExpense = await xataClient.db.Expenses.read(id)
+
+    await xataClient.db.Credit.update(oldPaymentMethodId, {
+        value: { $increment: parseFloat(oldExpense.value) }
+    })
+
+    await xataClient.db.Credit.update(paymentId, {
+        value: { $decrement: parseFloat(value) }
+    })
 
     await xataClient.db.Expenses.update(id, {
         name,
@@ -229,7 +248,7 @@ async function editCredit(id, formData) {
 
 }
 
-async function editInstallment(id, formData) {
+async function editInstallment(id, formData, oldPaymentMethodId) {
 
     'use server'
 
@@ -239,6 +258,21 @@ async function editInstallment(id, formData) {
     const value = formData.get('value')
     const details = `${formData.get('current')} / ${formData.get('last')}`
     const paymentId = formData.get('option')
+
+    const oldExpense = await xataClient.db.Expenses.read(id)
+
+    const oldSlash = oldExpense.details.indexOf(' / ')
+
+    await xataClient.db.Credit.update(oldPaymentMethodId, {
+        value: { $increment: parseFloat(oldExpense.value) * parseFloat(oldExpense.details.slice(oldSlash + 3)) }
+    })
+
+    const slash = details.indexOf(' / ')
+
+    await xataClient.db.Credit.update(paymentId, {
+        value: { $decrement: parseFloat(value) * parseFloat(details.slice(slash + 3)) }
+    })
+
 
     await xataClient.db.Expenses.update(id, {
         name,
