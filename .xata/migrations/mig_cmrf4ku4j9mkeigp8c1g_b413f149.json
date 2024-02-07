@@ -1,0 +1,13 @@
+{
+  "id": "mig_cmrf4ku4j9mkeigp8c1g",
+  "parentID": "mig_cmrf4hs7vdj5k5o4rae0",
+  "checksum": "1:b413f1497d38ec1f2bd6996004c41822ddfdf811f208bb956d32d7a0f2db7b52",
+  "operations": [
+    {
+      "removeColumn": {
+        "column": "date",
+        "table": "Expenses"
+      }
+    }
+  ]
+}

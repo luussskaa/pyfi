@@ -1,0 +1,16 @@
+{
+  "id": "mig_cmrf3q47vdj5k5o4ra90",
+  "parentID": "mig_cmrf3lc7vdj5k5o4ra80",
+  "checksum": "1:322daffc57f5ea0a7b56f1f93181146ec8256ed1b0c3a095844fd325a0603141",
+  "operations": [
+    {
+      "addColumn": {
+        "column": {
+          "name": "name",
+          "type": "string"
+        },
+        "table": "Savings"
+      }
+    }
+  ]
+}

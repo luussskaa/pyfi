@@ -1,0 +1,16 @@
+{
+  "id": "mig_cmrf3vk7vdj5k5o4rab0",
+  "parentID": "mig_cmrf3ue4j9mkeigp8bvg",
+  "checksum": "1:3be831f57c9674f048db37362a8100d0fa5ad64bdadbede422fc40803357dde1",
+  "operations": [
+    {
+      "addColumn": {
+        "column": {
+          "name": "value",
+          "type": "float"
+        },
+        "table": "Expenses"
+      }
+    }
+  ]
+}

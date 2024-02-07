@@ -1,0 +1,7 @@
+{
+  "databaseURL": "https://Lucas-Vicentine-s-workspace-9e1953.us-east-1.xata.sh/db/pyfi",
+  "codegen": {
+    "output": "src/xata.js",
+    "moduleType": "esm"
+  }
+}

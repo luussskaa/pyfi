@@ -1,0 +1,11 @@
+{
+  "id": "mig_cmrf34s7vdj5k5o4ra5g",
+  "checksum": "1:8b4cbaba85085bc8ca264964d98f38bb23e7f480464c09ab06b4ef4d089b7c05",
+  "operations": [
+    {
+      "addTable": {
+        "table": "Resources"
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "mig_cmrf3g64j9mkeigp8bug",
+  "parentID": "mig_cmrf3ae4j9mkeigp8btg",
+  "checksum": "1:51d160255f64f342b3365c4ee6eb525c67aa807a017466fda54426f640c0b511",
+  "operations": [
+    {
+      "addColumn": {
+        "column": {
+          "name": "name",
+          "type": "string"
+        },
+        "table": "Resources"
+      }
+    }
+  ]
+}
