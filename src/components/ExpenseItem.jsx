@@ -12,7 +12,7 @@ import confirm from '../../public/confirm.png'
 import cancel from '../../public/cancel.png'
 import Link from 'next/link';
 
-export default function ExpenseItem({ id, paymentId, title, value, details, type, payment, editDebit, deleteDebit, recurrentDebit, editCredit, deleteCredit, editInstallment, editPending, debitOptions, maxResource, creditOptions, maxCredit }) {
+export default function ExpenseItem({ id, paymentId, title, value, details, type, payment, editDebit, deleteDebit, recurrentDebit, editCredit, deleteCredit, editInstallment, deleteInstallment, editPending, deletePending, debitOptions, maxResource, creditOptions, maxCredit }) {
 
     const useThisValue = parseFloat(value.replace(',', '.'))
 
@@ -75,8 +75,6 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
             setButton(false)
         }
     }
-
-    console.log(formValue)
 
     const [day, setDay] = useState(details)
     const handleDay = (e) => {
@@ -264,7 +262,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                             <div className='font-bold'>
                                 Excluir?
                             </div>
-                            <div onClick={() => deleteCredit(id, paymentId, formValue, last)} className='duration-300 hover:-translate-y-2'>
+                            <div onClick={() => deleteCredit(id, paymentId, formValue)} className='duration-300 hover:-translate-y-2'>
                                 <Image className='mx-auto' src={confirm} width={40} height={40} />
                             </div>
                             <div className='duration-300 hover:-translate-y-2' onClick={handleRemove}>
@@ -354,7 +352,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                             <div className='font-bold'>
                                 Excluir?
                             </div>
-                            <div className='duration-300 hover:-translate-y-2'>
+                            <div onClick={() => deleteInstallment(id, paymentId, formValue, last)} className='duration-300 hover:-translate-y-2'>
                                 <Image className='mx-auto' src={confirm} width={40} height={40} />
                             </div>
                             <div className='duration-300 hover:-translate-y-2' onClick={handleRemove}>
@@ -451,7 +449,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                             <div className='font-bold'>
                                 Excluir?
                             </div>
-                            <div className='duration-300 hover:-translate-y-2'>
+                            <div onClick={() => deletePending(id)} className='duration-300 hover:-translate-y-2'>
                                 <Image className='mx-auto' src={confirm} width={40} height={40} />
                             </div>
                             <div className='duration-300 hover:-translate-y-2' onClick={handleRemove}>

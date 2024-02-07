@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs";
 import ExpenseItem from "@/components/ExpenseItem";
 import ExpenseCreator from "@/components/ExpenseCreator";
 import { redirect } from "next/navigation";
+import { de } from "translate-google/languages";
 
 async function addDebit(rec, formData) {
 
@@ -112,7 +113,9 @@ async function addInstallment(formData) {
     const type = 'installment'
 
     await xataClient.db.Credit.update(paymentId, {
-        value: parseFloat(await xataClient.db.Credit.read(paymentId).value) - (parseFloat(value) * (parseInt(formData.get('last'))))
+        value: {
+            $decrement: parseFloat(value) * parseFloat(formData.get('last'))
+        }
     })
 
     await xataClient.db.Expenses.create({
@@ -163,6 +166,18 @@ async function addPending(formData) {
         type,
         userId
     })
+
+    redirect('/gastos')
+
+}
+
+async function deletePending(id) {
+
+    'use server'
+
+    const xataClient = getXataClient()
+
+    await xataClient.db.Expenses.delete(id)
 
     redirect('/gastos')
 
@@ -318,7 +333,9 @@ export default async function page() {
                     editCredit={editCredit}
                     deleteCredit={deleteCredit}
                     editInstallment={editInstallment}
+                    deleteInstallment={deleteInstallment}
                     editPending={editPending}
+                    deletePending={deletePending}
                     debitOptions={JSON.parse(JSON.stringify(resources))}
                     creditOptions={JSON.parse(JSON.stringify(credit))}
                     maxResource={maxResource}
