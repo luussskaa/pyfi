@@ -21,10 +21,12 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
     const handleOptions = () => {
         setOptions(!options)
     }
+
     const [remove, setRemove] = useState(false)
     const handleRemove = () => {
         setRemove(!remove)
     }
+
     const [edit2, setEdit2] = useState(false)
     const handleEdit2 = () => {
         setEdit2(!edit2)
@@ -37,6 +39,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
         setRecurrent(recurrentDebit)
         setButton(false)
     }
+
     const [pay2, setPay2] = useState(false)
     const handlePay2 = () => {
         setPay2(!pay2)
@@ -138,7 +141,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
             {type === 'debit' &&
                 <>
                     {!options && !remove && !edit2 &&
-                        <div onClick={handleOptions} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md">
+                        <div onClick={handleOptions} className="w-11/12 h-24 bg-neutral-200 bg-opacity-10 flex items-center mt-3 cursor-pointer rounded-3xl duration-300 md:hover:scale-105 mx-auto shadow-md">
                             <div className="w-28 flex flex-col justify-center items-center">
                                 <Image src={debit} width={40} height={40} alt='pagamento no débito' />
                                 <div className="font-semibold">Dia {details}</div>
@@ -150,7 +153,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                         </div>
                     }
                     {options && !remove && !edit2 &&
-                        <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
+                        <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-30 md:hover:scale-105 mx-auto shadow-md select-none">
                             <div onClick={handleEdit2}>
                                 <Image className='mx-auto' src={edit} width={40} height={40} alt='editar pagamento' />
                                 <span className='w-[40px] text-sm text-center'>Editar</span>

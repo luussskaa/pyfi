@@ -160,8 +160,6 @@ export default function ExpenseCreator({ debit, credit, installment, pending, de
         }
     }
 
-    console.log(value)
-
     return (
         <>
             {debitForm &&
@@ -186,7 +184,7 @@ export default function ExpenseCreator({ debit, credit, installment, pending, de
                             <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option" value={option}>
                                 <option defaultValue={'Selecione...'} hidden>Selecione...</option>
                                 {debitOptions.filter(e => e.value >= value).map(e =>
-                                    <option value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                                    <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
                                 )}
                             </select>
                         </div>
@@ -205,13 +203,13 @@ export default function ExpenseCreator({ debit, credit, installment, pending, de
                         {buttonName && buttonValue && buttonDay && day <= 31 && buttonOption &&
                             <button className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:invert">
                                 <div className='invert mx-auto'>
-                                    <Image src={confirm} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                    <Image src={confirm} alt='confirmar' width={50} height={50} className='invert opacity-30' />
                                 </div>
                             </button>
                         }
                         <button onClick={handleDebitForm} className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
                             <div className='invert mx-auto'>
-                                <Image src={cancel} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
                             </div>
                         </button>
                     </div>
@@ -239,7 +237,7 @@ export default function ExpenseCreator({ debit, credit, installment, pending, de
                             <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option" value={option}>
                                 <option defaultValue={'Selecione...'} hidden>Selecione...</option>
                                 {creditOptions.filter(e => e.value >= value).map(e =>
-                                    <option value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                                    <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
                                 )}
                             </select>
                         </div>
@@ -253,13 +251,13 @@ export default function ExpenseCreator({ debit, credit, installment, pending, de
                         {buttonName && buttonValue && buttonDay && day <= 31 && buttonOption &&
                             <button className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:invert">
                                 <div className='invert mx-auto'>
-                                    <Image src={confirm} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                    <Image src={confirm} alt='confirmar' width={50} height={50} className='invert opacity-30' />
                                 </div>
                             </button>
                         }
                         <button onClick={handleCreditForm} className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
                             <div className='invert mx-auto'>
-                                <Image src={cancel} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
                             </div>
                         </button>
                     </div>
@@ -294,7 +292,7 @@ export default function ExpenseCreator({ debit, credit, installment, pending, de
                             <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option" value={option}>
                                 <option defaultValue={'Selecione...'} hidden>Selecione...</option>
                                 {creditOptions.filter(e => parseFloat(e.value) >= value * parseFloat(last)).map(e =>
-                                    <option value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                                    <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
                                 )}
                             </select>
                         </div>
@@ -305,13 +303,13 @@ export default function ExpenseCreator({ debit, credit, installment, pending, de
                         {buttonName && buttonValue && buttonOption && buttonCurrent && buttonLast && current <= last &&
                             <button className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:invert">
                                 <div className='invert mx-auto'>
-                                    <Image src={confirm} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                    <Image src={confirm} alt='confirmar' width={50} height={50} className='invert opacity-30' />
                                 </div>
                             </button>
                         }
                         <button onClick={handleInstallmentForm} className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
                             <div className='invert mx-auto'>
-                                <Image src={cancel} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
                             </div>
                         </button>
                     </div>
@@ -341,13 +339,13 @@ export default function ExpenseCreator({ debit, credit, installment, pending, de
                         {buttonName && buttonValue && buttonDay && day <= 31 &&
                             <button className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:invert">
                                 <div className='invert mx-auto'>
-                                    <Image src={confirm} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                    <Image src={confirm} alt='confirmar' width={50} height={50} className='invert opacity-30' />
                                 </div>
                             </button>
                         }
                         <button onClick={handlePendingForm} className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
                             <div className='invert mx-auto'>
-                                <Image src={cancel} alt='dinheiro' width={50} height={50} className='invert opacity-30' />
+                                <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
                             </div>
                         </button>
                     </div>
@@ -356,12 +354,13 @@ export default function ExpenseCreator({ debit, credit, installment, pending, de
 
             {!debitForm && !creditForm && !installmentForm && !pendingForm &&
                 <>
-                    <p className="px-10 mb-5">Adicione um novo gasto pelo tipo de pagamento:</p>
+                    <p className="px-10 mb-3 font-semibold">Adicionar gastos</p>
+                    <p className="px-10 mb-5 text-xs">Adicione um novo gasto pelo tipo de pagamento:</p>
                     <div className="w-11/12 flex-nowrap justify-center items-center px-10">
-                        <button onClick={handleDebitForm} className="w-[120px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ débito</button>
-                        <button onClick={handleCreditForm} className="w-[200px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ crédito (comum)</button>
-                        <button onClick={handleInstallmentForm} className="w-[250px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ crédito (parcelamento)</button>
-                        <button onClick={handlePendingForm} className="w-[150px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ pendente</button>
+                        <button onClick={handleDebitForm} className="w-[120px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ débito</button>
+                        <button onClick={handleCreditForm} className="w-[200px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ crédito (comum)</button>
+                        <button onClick={handleInstallmentForm} className="w-[250px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ crédito (parcelamento)</button>
+                        <button onClick={handlePendingForm} className="w-[150px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ pendente</button>
                     </div>
                 </>
             }

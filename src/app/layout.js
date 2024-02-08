@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
       <html lang="en" className={font.className}>
         <body className='w-full min-[1281px]:w-2/6 mx-auto h-full flex-nowrap justify-center items-center bg-black text-white duration-300'>
           <Sticky title={'Meu dinheiro'} />
-          <main className="flex flex-col items-start justify-center h-full mt-10 pt-10 pb-10 mb-10 backdrop-blur-3xl md:bg-white md:bg-opacity-10 md:shadow-md md:rounded-3xl  md:border-neutral-600">
+          <main className="flex flex-col items-start justify-start max-h-[710px] overflow-y-scroll mt-10 pt-10 pb-10 mb-10 backdrop-blur-3xl md:bg-white md:bg-opacity-10 md:shadow-md md:rounded-[10px]  md:border-neutral-600">
 
             {children}
           </main>

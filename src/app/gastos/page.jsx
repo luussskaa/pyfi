@@ -329,26 +329,25 @@ export default async function page() {
 
     return (
         <>
-
             <div className="w-full flex flex-col justify-center items-center mb-10">
                 <div className="text-4xl font-semibold mb-2">Gastos</div>
                 <div className="text-lg">R$ {expenses.length !== 0 ? expenses.map(expense => expense.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'}</div>
             </div>
 
-            <div className="w-11/12 mx-auto border border-neutral-500 border-x-0 border-t-0 mb-10"></div>
+            <div className="w-11/12 mx-auto border border-white border-x-0 border-t-0 mb-10"></div>
 
             <ExpenseCreator debit={addDebit} credit={addCredit} installment={addInstallment} pending={addPending} debitOptions={JSON.parse(JSON.stringify(resources))} creditOptions={JSON.parse(JSON.stringify(credit))} maxResource={maxResource} maxCredit={maxCredit} />
 
-            <div className="w-11/12 mx-auto border border-neutral-500 border-x-0 border-t-0 mt-10 mb-5"></div>
+            {/* <div className="w-11/12 mx-auto border border-white border-x-0 border-t-0 mt-10 mb-5"></div> */}
 
             {expenses.length !== 0 ?
                 <>
-                    <p className="px-10 mt-5 mb-3 text-lg font-semibold">Lançamentos</p>
-                    <p className="px-10 mb-5">Clique em um item para mais opções.</p>
+                    <p className="px-10 mt-10 mb-3 font-semibold">Lançamentos</p>
+                    <p className="px-10 mb-5 text-xs">Clique em um item para mais opções.</p>
                 </>
                 :
                 <>
-                    <p className="px-10 mt-5 mb-3 font-semibold">Ainda não há lançamentos</p>
+                    <p className="px-10 mt-10 mb-3 font-semibold">Ainda não há lançamentos</p>
                     <p className="px-10 mb-5 text-xs">Adicione um novo gasto.</p>
                 </>
             }

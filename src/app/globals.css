@@ -21,7 +21,8 @@ body {
   /* background: linear-gradient(to bottom,
       transparent,
       rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb)); */
-  background-image: url('2.jpg');
+  background-image: url('bgg.png');
+  background-size: cover;
 }
 
 @layer utilities {
@@ -49,7 +50,7 @@ option {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: gray;
+  background: white;
   opacity: 0.2;
   background-clip: content-box;
   border: 5px solid transparent;
