@@ -86,8 +86,7 @@ export default function ResourceCreator({ resource, resources }) {
                     {resources.length !== 0 ?
                         <>
                             <p className="px-10 mb-3 text-xl font-semibold">Recursos</p>
-                            <p className="px-10 mb-5 text-sm">Recursos representam o dinheiro que você pretende utilizar.</p>
-                            <p className="px-10 mb-5 text-xs">Clique em um item para mais opções.</p>
+                            <p className="px-10 mb-5 text-sm">Aqui você pode acompanhar o uso do seu dinheiro.</p>
 
                             <div className="w-11/12 flex-nowrap justify-center items-center px-10">
                                 <button onClick={handleResourceForm} className="w-[120px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ recurso</button>
@@ -97,15 +96,20 @@ export default function ResourceCreator({ resource, resources }) {
                                 <div className="text-lg font-semibold">Total</div>
                                 <div className="w-full flex flex-col justify-center items-end">
                                     <span>R$ {totalResources}</span>
-                                    <span className="text-xs">em {resourcesQty} recursos</span>
+                                    {resourcesQty > 1 ?
+                                        <span className="text-xs">em {resourcesQty} recursos</span>
+                                        :
+                                        <span className="text-xs">em um recurso</span>
+                                    }
                                 </div>
                             </div>
+
+                            <p className="px-10 mb-5 text-xs">Clique em um item para mais opções.</p>
                         </>
                         :
                         <>
                             <p className="px-10 mb-3 font-semibold">Você não possui recursos</p>
-                            <p className="px-10 mb-5 text-sm">Recursos representam o dinheiro que você pretende utilizar.</p>
-                            <p className="px-10 mb-5 text-xs">Adicione uma novo recurso e ele aparecerá aqui.</p>
+                            <p className="px-10 mb-5 text-sm">Recursos representam o dinheiro que você pretende utilizar e são necessários para adicionar gastos pagos no débito e para quitar pagamentos pendentes.</p>
 
                             <div className="w-11/12 flex-nowrap justify-center items-center px-10">
                                 <button onClick={handleResourceForm} className="w-[120px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ recurso</button>

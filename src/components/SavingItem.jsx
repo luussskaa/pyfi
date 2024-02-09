@@ -5,11 +5,12 @@ import Image from "next/image";
 
 import poupanca from '../../public/poupanca.png'
 import edit from '../../public/edit.png'
+import withdraw from '../../public/withdraw.png'
 import destroy from '../../public/destroy.png'
 import confirm from '../../public/confirm.png'
 import cancel from '../../public/cancel.png'
 
-export default function SavingItem({ id, title, value, editSaving, deleteSaving }) {
+export default function SavingItem({ id, title, value, resourceOptions, editSaving, deleteSaving, withdrawSaving }) {
 
     const useThisValue = parseFloat(value)
 
@@ -31,10 +32,19 @@ export default function SavingItem({ id, title, value, editSaving, deleteSaving 
         setButton(false)
     }
 
+    const [withdraw2, setWithdraw] = useState(false)
+    const handleWithdraw = () => {
+        setWithdraw(!withdraw2)
+        setName(title)
+        setFormValue(useThisValue)
+        setButton(false)
+    }
+
     const allOff = () => {
         setOptions(false)
         setRemove(false)
         setEdit2(false)
+        setWithdraw(false)
     }
 
     const [button, setButton] = useState(false)
@@ -61,9 +71,16 @@ export default function SavingItem({ id, title, value, editSaving, deleteSaving 
         }
     }
 
+    const [option, setOption] = useState()
+    const [buttonOption, setButtonOption] = useState()
+    const handleOption = (e) => {
+        setButtonOption(e.target.value)
+        setButton(true)
+    }
+
     return (
         <>
-            {!options && !remove && !edit2 &&
+            {!options && !remove && !edit2 && !withdraw2 &&
                 <div onClick={handleOptions} className="w-11/12 h-24 bg-neutral-200 bg-opacity-10 flex items-center mt-3 cursor-pointer rounded-3xl duration-300 md:hover:scale-105 mx-auto shadow-md">
                     <div className="w-28 flex justify-center items-center">
                         <Image src={poupanca} width={40} height={40} alt='poupança' />
@@ -74,11 +91,15 @@ export default function SavingItem({ id, title, value, editSaving, deleteSaving 
                     </div>
                 </div >
             }
-            {options && !remove && !edit2 &&
+            {options && !remove && !edit2 && !withdraw2 &&
                 <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-30 md:hover:scale-105 mx-auto shadow-md select-none">
                     <div onClick={handleEdit2}>
                         <Image className='mx-auto' src={edit} width={40} height={40} alt='editar pagamento' />
                         <span className='w-[40px] text-sm text-center'>Editar</span>
+                    </div>
+                    <div onClick={handleWithdraw}>
+                        <Image className='mx-auto' src={withdraw} width={40} height={40} alt='editar pagamento' />
+                        <span className='w-[40px] text-sm text-center'>Sacar</span>
                     </div>
                     <div onClick={handleRemove}>
                         <Image className='mx-auto' src={destroy} width={40} height={40} alt='deletar pagamento' />
@@ -86,7 +107,7 @@ export default function SavingItem({ id, title, value, editSaving, deleteSaving 
                     </div>
                 </div>
             }
-            {!options && remove && !edit2 &&
+            {!options && remove && !edit2 && !withdraw2 &&
                 <div onClick={handleRemove} onMouseLeave={allOff} className="w-11/12 h-[96px] bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
                     <div className='font-bold'>
                         Excluir?
@@ -99,7 +120,7 @@ export default function SavingItem({ id, title, value, editSaving, deleteSaving 
                     </div>
                 </div>
             }
-            {!options && !remove && edit2 &&
+            {!options && !remove && edit2 && !withdraw2 &&
                 <div onMouseLeave={allOff} className="w-11/12 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 mx-auto shadow-md select-none">
                     <form action={(formData) => {
                         editSaving(id, formData)
@@ -129,17 +150,39 @@ export default function SavingItem({ id, title, value, editSaving, deleteSaving 
                     </form>
                 </div>
             }
+            {!options && !remove && !edit2 && withdraw2 &&
+                <form action={(formData) => {
+                    withdrawSaving(id, formData)
+                }} onSubmit={handleWithdraw} className="w-11/12 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
+                    <div className='flex flex-col px-10 my-5'>
+                        <div className='flex flex-col mb-5'>
+                            <label className='mb-2 text-sm' htmlFor="value">Valor a sacar</label>
+                            <input onChange={handleValue} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' type="number" name="value" id="value" value={formValue} placeholder='0,00' />
+                        </div>
+                        <label className='mb-2 text-sm' htmlFor="option">Forma de pagamento</label>
+                        <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option" value={option}>
+                            <option defaultValue={'Selecione...'} hidden>Selecione...</option>
+                            {resourceOptions.filter(e => e.value >= parseFloat(useThisValue)).map(e =>
+                                <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                            )}
+                        </select>
+                    </div>
+                    <div className='flex w-full justify-end pr-10'>
+                        {button && buttonOption && formValue <= useThisValue &&
+                            <button className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:invert">
+                                <div className='invert mx-auto'>
+                                    <Image src={confirm} alt='confirmar' width={50} height={50} className='invert opacity-30' />
+                                </div>
+                            </button>
+                        }
+                        <button onClick={handleWithdraw} className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
+                            <div className='invert mx-auto'>
+                                <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
+                            </div>
+                        </button>
+                    </div>
+                </form>
+            }
         </>
     )
 }
-
-
-{/* <Link href={`/poupancas/${id}/pagar`} className="w-11/12 bg-neutral-900 bg-opacity-20 flex items-center mt-3 border border-neutral-600 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-100 md:hover:scale-105 mx-auto shadow-md">
-<div className="w-28 flex justify-center items-center">
-    <Image src={poupanca} width={40} height={40} />
-</div>
-<div className="w-4/6">
-    <div className="font-bold mt-5 mb-2">{title}</div>
-    <div className="text-lg mb-5">R$ {value}</div>
-</div>
-</Link> */}

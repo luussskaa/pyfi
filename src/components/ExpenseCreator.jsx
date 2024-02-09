@@ -7,7 +7,7 @@ import cancel from '../../public/cancel.png'
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default function ExpenseCreator({ debit, credit, installment, pending, debitOptions, creditOptions, maxResource, maxCredit }) {
+export default function ExpenseCreator({ resources, expenses, credits, debit, credit, installment, pending, debitOptions, creditOptions, maxResource, maxCredit }) {
 
     function isFloat(n) {
         return Number(n) === n && n % 1 !== 0;
@@ -354,14 +354,45 @@ export default function ExpenseCreator({ debit, credit, installment, pending, de
 
             {!debitForm && !creditForm && !installmentForm && !pendingForm &&
                 <>
-                    <p className="px-10 mb-3 font-semibold">Adicionar gastos</p>
-                    <p className="px-10 mb-5 text-xs">Adicione um novo gasto pelo tipo de pagamento:</p>
-                    <div className="w-11/12 flex-nowrap justify-center items-center px-10">
-                        <button onClick={handleDebitForm} className="w-[120px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ débito</button>
-                        <button onClick={handleCreditForm} className="w-[200px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ crédito (comum)</button>
-                        <button onClick={handleInstallmentForm} className="w-[250px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ crédito (parcelamento)</button>
-                        <button onClick={handlePendingForm} className="w-[150px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ pendente</button>
+                    {resources.length !== 0 || credits.length !== 0 &&
+                        <>
+                            <p className="px-10 mb-3 font-semibold">Adicionar gastos</p>
+                            <p className="px-10 mb-5 text-xs">Adicione um novo gasto pelo tipo de pagamento:</p>
+                        </>
+                    }
+
+                    {resources.length === 0 &&
+                        <p className="px-10 mt-5 mb-5 text-sm font-semibold">⚠ Você precisa de um recurso para poder adicionar pagamentos no débito e para quitar pagamentos pendentes!</p>
+                    }
+                    {credits.length === 0 &&
+                        <p className="px-10 mt-5 mb-5 text-sm font-semibold">⚠ Você precisa de um cartão de crédito para poder adicionar pagamentos  no crédito e parcelamentos!</p>
+                    }
+
+                    <div className="w-11/12 flex-nowrap justify-center items-center mt-5 px-10">
+                        {resources.length !== 0 &&
+                            <button onClick={handleDebitForm} className="w-[120px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ débito</button>
+                        }
+                        {credits.length !== 0 &&
+                            <>
+                                <button onClick={handleCreditForm} className="w-[200px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ crédito (comum)</button>
+                                <button onClick={handleInstallmentForm} className="w-[250px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ crédito (parcelamento)</button>
+                            </>
+                        }
+                        {resources.length !== 0 &&
+                            <button onClick={handlePendingForm} className="w-[150px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ pendente</button>
+                        }
                     </div>
+                    {expenses.length !== 0 ?
+                        <>
+                            <p className="px-10 mt-10 mb-3 font-semibold">Lançamentos do mês</p>
+                            <p className="px-10 mb-5 text-xs">Clique em um item para mais opções.</p>
+                        </>
+                        :
+                        <>
+                            <p className="px-10 mt-10 mb-3 font-semibold">Ainda não há lançamentos neste mês</p>
+                            <p className="px-10 mb-5 text-xs">Adicione um novo gasto se necessário.</p>
+                        </>
+                    }
                 </>
             }
         </>

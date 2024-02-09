@@ -28,6 +28,14 @@ const tables = [
     ],
   },
   { name: "Credit", columns: [] },
+  {
+    name: "CurrentMonth",
+    columns: [
+      { name: "name", type: "string" },
+      { name: "month", type: "string" },
+      { name: "userId", type: "string" }
+    ],
+  },
 ];
 /** @type { import('@xata.io/client').ClientConstructor<{}> } */
 const DatabaseClient = buildClient();

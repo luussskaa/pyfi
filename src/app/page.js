@@ -13,6 +13,7 @@ import Image from "next/image";
 import ResourceCreator from "@/components/ResourceCreator";
 import { redirect } from "next/navigation";
 import SavingCreator from "@/components/SavingCreator";
+import Close from "@/components/Close";
 
 async function addResource(formData) {
 
@@ -116,33 +117,185 @@ async function deleteSaving(id) {
 
 }
 
+async function withdrawSaving(id, formData) {
+
+  'use server'
+
+  const xataClient = getXataClient()
+
+  const value = formData.get('value')
+  const resourceId = formData.get('option')
+
+  await xataClient.db.Savings.update(id, {
+    value: { $decrement: parseFloat(value) }
+  })
+
+  const saving = await xataClient.db.Savings.read(id)
+
+  if (saving.value === 0) {
+    await xataClient.db.Savings.delete(id)
+  }
+
+  await xataClient.db.Resources.update(resourceId, {
+    value: { $increment: parseFloat(value) }
+  })
+
+  redirect('/')
+
+}
+
+async function addInitialMonth() {
+
+  'use server'
+
+  const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+
+  const { userId } = auth()
+  const xataClient = getXataClient()
+
+  await xataClient.db.CurrentMonth.create({
+    name: `${months[currentMonth]} / ${currentYear}`,
+    month: months[currentMonth],
+    year: currentYear,
+    userId
+  })
+
+  redirect('/')
+
+}
+
+async function endMonth(id) {
+
+  'use server'
+
+  const { userId } = auth()
+  const xataClient = getXataClient()
+
+  const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+
+  const finishedMonth = await xataClient.db.CurrentMonth.filter({ userId }).getMany()
+
+  if (finishedMonth[0].year !== currentYear) {
+    if (finishedMonth[0].month === 'Dezembro') {
+      await xataClient.db.CurrentMonth.update(id, {
+        name: `${months[0]} / ${currentYear}`,
+        month: months[0],
+        year: currentYear
+      })
+    } else {
+      await xataClient.db.CurrentMonth.update(id, {
+        name: `${months[currentMonth]} / ${currentYear}`,
+        month: months[currentMonth],
+        year: currentYear
+      })
+    }
+  } else {
+    await xataClient.db.CurrentMonth.update(id, {
+      name: `${months[currentMonth + 1]} / ${currentYear}`,
+      month: months[currentMonth + 1]
+    })
+  }
+
+  const expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
+  const credit = await xataClient.db.Credit.filter({ userId }).getMany()
+  const debitExpenses = expenses.filter(e => e.type === 'debit') // remove
+  const pendingExpenses = expenses.filter(e => e.type === 'pending') // keep and update details
+  const creditExpenses = expenses.filter(e => e.type === 'credit') // sum up to invoice
+  const installments = expenses.filter(e => e.type === 'installment') // update progress(details) and sum up to invoice
+
+  const invoiceExpenses = [...creditExpenses, ...installments]
+
+  for (let i = 0; i < debitExpenses.length; i++) {
+    await xataClient.db.Expenses.delete(debitExpenses[i].id)
+  }
+
+  for (let i = 0; i < pendingExpenses.length; i++) {
+    await xataClient.db.Expenses.update(pendingExpenses[i].id, {
+      details: `${pendingExpenses[i].details} (${finishedMonth[0].name.slice(0, 3)})`,
+    })
+  }
+
+  for (let i = 0; i < installments.length; i++) {
+    if (parseInt(installments[i].details.slice(0, installments[i].details.indexOf('/')) === parseInt(installments[i].details.slice(installments[i].details.indexOf('/') + 3)))) {
+      await xataClient.db.Expenses.delete(installments[i].id)
+    } else {
+      await xataClient.db.Expenses.update(installments[i].id, {
+        details: `${parseInt(installments[i].details.slice(0, installments[i].details.indexOf('/'))) + 1} / ${installments[i].details.slice(installments[i].details.indexOf('/') + 1)}`
+      })
+    }
+
+    for (let i = 0; i < invoiceExpenses.length; i++) {
+      for (let i = 0; i < credit.length; i++) {
+        if (credit[i].id === invoiceExpenses[i].paymentId) {
+          const checkInvoice = await xataClient.db.Expenses.read(credit[i].id)
+          if (checkInvoice === null) {
+            const createInvoice = await xataClient.db.Expenses.create(credit[i].id, {
+              name: `Fatura ${credit[i].name} (${finishedMonth[0].name.slice(0, 3)})`,
+              value: invoiceExpenses[i].value,
+              details: `${credit[i].details.slice(credit[i].details.indexOf('/'), credit[i].details.indexOf('/') + 1)}`,
+              type: 'pending',
+              paymentId: credit[i].id,
+              userId
+            })
+          } else {
+            const updateInvoice = await xataClient.db.Expenses.update(credit[i].id, {
+              value: { $increment: invoiceExpenses[i].value }
+            })
+          }
+        }
+        await xataClient.db.Expenses.delete(invoiceExpenses[i].id)
+      }
+    }
+
+
+    for (let i = 0; i < creditExpenses.length; i++) {
+      await xataClient.db.Expenses.delete(creditExpenses[i].id)
+    }
+
+    redirect('/')
+
+  }
+}
+
+
 export default async function Home() {
 
   const { userId } = auth()
   const xataClient = getXataClient()
 
+  const currentMonth = await xataClient.db.CurrentMonth.filter({ userId }).getMany()
+  if (currentMonth.length === 0) {
+    addInitialMonth()
+  }
+
   const resources = await xataClient.db.Resources.filter({ userId }).getMany()
   const expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
   const savings = await xataClient.db.Savings.filter({ userId }).getMany()
 
+  const totalExpenses = expenses.length !== 0 && expenses.filter(e => e.type === 'debit').length !== 0 && expenses.filter(e => e.type === 'debit').map(e => parseFloat(e.value)).reduce((a, b) => a + b)
+
   return (
     <>
       <div className="w-full flex flex-col justify-center items-center mb-10">
-        <div className="text-sm font-semibold mb-2">Fevereiro / 24</div>
+        <div className="text-sm font-semibold mb-2">{currentMonth.length !== 0 && currentMonth[0].name}</div>
         <div className="text-4xl font-semibold mb-2">Meu dinheiro</div>
-        <div className="text-lg">R$ {resources.length !== 0 ? resources.map(e => e.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'}</div>
+        <div className="text-lg">R$ {resources.length !== 0 ? (resources.map(e => e.value).reduce((a, b) => a + b) + savings.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'}</div>
       </div>
 
 
-      {/* <div className="w-full flex mb-10 flex-col items-center justify-center">
+      <div className="w-full flex mb-10 flex-col items-center justify-center">
         <p className="px-10 mb-3 font-semibold">⚠ Você já concluiu as atividades deste mês?</p>
-        <p className="px-10 mb-5 text-xs">Clique no botão abaixo para começar o mês seguinte.</p>
+        <p className="px-10 mb-5 text-xs">Clique no botão abaixo para concluir o mês atual e começar o mês seguinte.</p>
 
-        <div className="w-11/12 flex justify-center items-center px-10">
-          <button className="w-[250px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">FECHAR MÊS</button>
-        </div>
+        <Close currentMonth={JSON.parse(JSON.stringify(currentMonth))} endMonth={endMonth} />
 
-      </div> */}
+      </div>
 
       <div className="w-11/12 mx-auto border border-white border-x-0 border-t-0 mb-10"></div>
 
@@ -156,6 +309,7 @@ export default async function Home() {
             title={resource.name}
             value={resource.value}
             expenses={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === resource.id)))}
+            totalExpenses={totalExpenses}
             editResource={editResource}
             deleteResource={deleteResource} />
         ))}
@@ -172,18 +326,13 @@ export default async function Home() {
             id={saving.id}
             title={saving.name}
             value={saving.value}
+            resourceOptions={JSON.parse(JSON.stringify(resources))}
             editSaving={editSaving}
-            deleteSaving={deleteSaving} />
+            deleteSaving={deleteSaving}
+            withdrawSaving={withdrawSaving}
+          />
         ))}
       </div>
-
-
-
-
-      {/* {savings.map(saving => (
-        <SavingItem key={saving.id} id={saving.id} title={saving.name} value={(saving.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
-      ))} */}
-
     </>
   )
 }

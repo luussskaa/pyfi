@@ -87,7 +87,6 @@ export default function SavingCreator({ saving, savings }) {
                         <>
                             <p className="px-10 mb-3 text-xl font-semibold">Poupanças</p>
                             <p className="px-10 mb-5 text-sm">Aqui fica o dinheiro que você tem guardado.</p>
-                            <p className="px-10 mb-5 text-xs">Clique em um item para mais opções.</p>
 
                             <div className="w-11/12 flex-nowrap justify-center items-center px-10">
                                 <button onClick={handleSavingForm} className="w-[150px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ poupança</button>
@@ -97,15 +96,20 @@ export default function SavingCreator({ saving, savings }) {
                                 <div className="text-lg font-semibold">Total</div>
                                 <div className="w-full flex flex-col justify-center items-end">
                                     <span>R$ {totalSavings}</span>
-                                    <span className="text-xs">em {savingsQty} recursos</span>
+                                    {savingsQty > 1 ?
+                                        <span className="text-xs">em {savingsQty} poupanças</span>
+                                        :
+                                        <span className="text-xs">em uma poupança</span>
+                                    }
                                 </div>
                             </div>
+
+                            <p className="px-10 mb-5 text-xs">Clique em um item para mais opções.</p>
                         </>
                         :
                         <>
                             <p className="px-10 mb-3 font-semibold">Você não possui poupanças</p>
                             <p className="px-10 mb-5 text-sm">Aqui ficaria o dinheiro que você tem guardado.</p>
-                            <p className="px-10 mb-5 text-xs">Adicione uma nova poupança e ela aparecerá aqui.</p>
 
                             <div className="w-11/12 flex-nowrap justify-center items-center px-10">
                                 <button onClick={handleSavingForm} className="w-[150px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ poupança</button>

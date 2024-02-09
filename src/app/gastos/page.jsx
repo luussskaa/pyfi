@@ -273,7 +273,6 @@ async function editInstallment(id, formData, oldPaymentMethodId) {
         value: { $decrement: parseFloat(value) * parseFloat(details.slice(slash + 3)) }
     })
 
-
     await xataClient.db.Expenses.update(id, {
         name,
         value: parseFloat(value),
@@ -330,67 +329,48 @@ export default async function page() {
     return (
         <>
             <div className="w-full flex flex-col justify-center items-center mb-10">
-                <div className="text-4xl font-semibold mb-2">Gastos</div>
+                <div className="text-4xl font-semibold mb-2">Meus gastos</div>
                 <div className="text-lg">R$ {expenses.length !== 0 ? expenses.map(expense => expense.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'}</div>
             </div>
 
             <div className="w-11/12 mx-auto border border-white border-x-0 border-t-0 mb-10"></div>
 
-            <ExpenseCreator debit={addDebit} credit={addCredit} installment={addInstallment} pending={addPending} debitOptions={JSON.parse(JSON.stringify(resources))} creditOptions={JSON.parse(JSON.stringify(credit))} maxResource={maxResource} maxCredit={maxCredit} />
-
-            {/* <div className="w-11/12 mx-auto border border-white border-x-0 border-t-0 mt-10 mb-5"></div> */}
-
-            {expenses.length !== 0 ?
-                <>
-                    <p className="px-10 mt-10 mb-3 font-semibold">Lançamentos</p>
-                    <p className="px-10 mb-5 text-xs">Clique em um item para mais opções.</p>
-                </>
-                :
-                <>
-                    <p className="px-10 mt-10 mb-3 font-semibold">Ainda não há lançamentos</p>
-                    <p className="px-10 mb-5 text-xs">Adicione um novo gasto.</p>
-                </>
-            }
-
-            {expenses.length !== 0 && expenses.map(expense => (
-                <ExpenseItem key={expense.id} id={expense.id}
-                    paymentId={expense.paymentId}
-                    title={expense.name}
-                    value={(expense.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    details={expense.details}
-                    type={expense.type}
-                    payment={expense.type === 'debit' ? resources.filter(e => e.id === expense.paymentId).map(e => `${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`) : expense.type === 'credit' ? credit.filter(e => e.id === expense.paymentId).map(e => `${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`) : expense.type === 'installment' && credit.filter(e => e.id === expense.paymentId).map(e => `${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`)}
-                    editDebit={editDebit}
-                    deleteDebit={deleteDebit}
-                    recurrentDebit={expense.type === 'debit' ? expense.recurrent : null}
-                    editCredit={editCredit}
-                    deleteCredit={deleteCredit}
-                    editInstallment={editInstallment}
-                    deleteInstallment={deleteInstallment}
-                    editPending={editPending}
-                    deletePending={deletePending}
+            <div className="w-full h-auto">
+                <ExpenseCreator
+                    resources={JSON.parse(JSON.stringify(resources))}
+                    expenses={JSON.parse(JSON.stringify(expenses))}
+                    credits={JSON.parse(JSON.stringify(credit))}
+                    debit={addDebit}
+                    credit={addCredit}
+                    installment={addInstallment}
+                    pending={addPending}
                     debitOptions={JSON.parse(JSON.stringify(resources))}
                     creditOptions={JSON.parse(JSON.stringify(credit))}
                     maxResource={maxResource}
                     maxCredit={maxCredit} />
-            ))}
+                {expenses.length !== 0 && expenses.map(expense => (
+                    <ExpenseItem key={expense.id} id={expense.id}
+                        paymentId={expense.paymentId}
+                        title={expense.name}
+                        value={(expense.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        details={expense.details}
+                        type={expense.type}
+                        payment={expense.type === 'debit' ? resources.filter(e => e.id === expense.paymentId).map(e => `${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`) : expense.type === 'credit' ? credit.filter(e => e.id === expense.paymentId).map(e => `${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`) : expense.type === 'installment' && credit.filter(e => e.id === expense.paymentId).map(e => `${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`)}
+                        editDebit={editDebit}
+                        deleteDebit={deleteDebit}
+                        recurrentDebit={expense.type === 'debit' ? expense.recurrent : null}
+                        editCredit={editCredit}
+                        deleteCredit={deleteCredit}
+                        editInstallment={editInstallment}
+                        deleteInstallment={deleteInstallment}
+                        editPending={editPending}
+                        deletePending={deletePending}
+                        debitOptions={JSON.parse(JSON.stringify(resources))}
+                        creditOptions={JSON.parse(JSON.stringify(credit))}
+                        maxResource={maxResource}
+                        maxCredit={maxCredit} />
+                ))}
+            </div>
         </>
     )
 }
-
-{/* {expenses.length !== 0 &&
-                <>
-                    {unpaid.length !== 0 &&
-                        <Total text={'• pendentes'} value={unpaid.map(expense => expense.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
-                    }
-                    {debit.length !== 0 &&
-                        <Total text={'• no débito'} value={debit.map(expense => expense.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
-                    }
-                    {credit.length !== 0 &&
-                        <Total text={'• no crédito (comum)'} value={credit.map(expense => expense.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
-                    }
-                    {installment.length !== 0 &&
-                        <Total text={'• no crédito (parcelas)'} value={installment.map(expense => expense.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
-                    }
-                </>
-            } */}

@@ -95,7 +95,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
         }
     }
 
-    const [option, setOption] = useState(payment[0])
+    const [option, setOption] = useState(paymentId)
     const handleOption = (e) => {
         setOption(e.target.value)
         setButton(true)
@@ -109,7 +109,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
 
     const slash = details.indexOf(' / ')
 
-    const [current, setCurrent] = useState(details.slice(0, slash))
+    const [current, setCurrent] = useState(details.slice(0, slash)) // parseInt?
     const [last, setLast] = useState(details.slice(slash + 3))
     const handleCurrent = (e) => {
         setCurrent(e.target.value)
@@ -165,7 +165,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                         </div>
                     }
                     {!options && remove && !edit2 &&
-                        <div onClick={handleRemove} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
+                        <div onClick={handleRemove} onMouseLeave={allOff} className="w-11/12 h-[96px] bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
                             <div className='font-bold'>
                                 Excluir?
                             </div>
@@ -193,8 +193,8 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                 {parseFloat(useThisValue) <= maxResource ?
                                     <div className='flex flex-col px-10 mb-5'>
                                         <label className='mb-2 text-sm' htmlFor="option">Forma de pagamento</label>
-                                        <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option" value={option}>
-                                            <option defaultValue={option} hidden>{payment[0]}</option>
+                                        <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option">
+                                            <option value={option} hidden>{payment[0]}</option>
                                             {debitOptions.filter(e => e.value >= parseFloat(useThisValue)).filter(e => e.id !== paymentId).map(e =>
                                                 <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
                                             )}
@@ -233,7 +233,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                 type === 'credit' &&
                 <>
                     {!options && !remove && !edit2 &&
-                        <div onClick={handleOptions} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md">
+                        <div onClick={handleOptions} className="w-11/12 h-24 bg-neutral-200 bg-opacity-10 flex items-center mt-3 cursor-pointer rounded-3xl duration-300 md:hover:scale-105 mx-auto shadow-md">
                             <div className="w-28 flex flex-col justify-center items-center">
                                 <Image src={credit} width={40} height={40} alt='pagamento no crédito' />
                                 <div className="font-semibold">Dia {details}</div>
@@ -245,7 +245,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                         </div>
                     }
                     {options && !remove && !edit2 &&
-                        <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
+                        <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-30 md:hover:scale-105 mx-auto shadow-md select-none">
                             <div onClick={handleEdit2}>
                                 <Image className='mx-auto' src={edit} width={40} height={40} alt='editar pagamento' />
                                 <span className='w-[40px] text-sm text-center'>Editar</span>
@@ -257,7 +257,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                         </div>
                     }
                     {!options && remove && !edit2 &&
-                        <div onClick={handleRemove} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
+                        <div onClick={handleRemove} onMouseLeave={allOff} className="w-11/12 h-[96px] bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
                             <div className='font-bold'>
                                 Excluir?
                             </div>
@@ -286,7 +286,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                     <div className='flex flex-col px-10 mb-5'>
                                         <label className='mb-2 text-sm' htmlFor="option">Forma de pagamento</label>
                                         <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option" value={option}>
-                                            <option defaultValue={option} hidden>{payment[0]}</option>
+                                            <option value={option} hidden>{payment[0]}</option>
                                             {creditOptions.filter(e => e.value >= parseFloat(useThisValue)).filter(e => e.id !== paymentId).map(e =>
                                                 <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
                                             )}
@@ -322,7 +322,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                 type === 'installment' &&
                 <>
                     {!options && !remove && !edit2 &&
-                        <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md">
+                        <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-200 bg-opacity-10 flex items-center mt-3 cursor-pointer rounded-3xl duration-300 md:hover:scale-105 mx-auto shadow-md">
                             <div className="w-28 flex flex-col justify-center items-center">
                                 <Image src={credit} width={40} height={40} alt='parcelamento' />
                                 <div className="font-semibold">{details}</div>
@@ -334,7 +334,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                         </div>
                     }
                     {options && !remove && !edit2 &&
-                        <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
+                        <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-30 md:hover:scale-105 mx-auto shadow-md select-none">
                             <div onClick={handleEdit2}>
                                 <Image className='mx-auto' src={edit} width={40} height={40} alt='editar parcelamento' />
                                 <span className='w-[40px] text-sm text-center'>Editar</span>
@@ -346,7 +346,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                         </div>
                     }
                     {!options && remove && !edit2 &&
-                        <div onClick={handleRemove} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
+                        <div onClick={handleRemove} onMouseLeave={allOff} className="w-11/12 h-[96px] bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
                             <div className='font-bold'>
                                 Excluir?
                             </div>
@@ -382,7 +382,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                                     <div className='flex flex-col px-10 mb-5'>
                                         <label className='mb-2 text-sm' htmlFor="option">Forma de pagamento</label>
                                         <select onChange={handleOption} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' name="option" id="option" value={option}>
-                                            <option defaultValue={option} hidden>{payment[0]}</option>
+                                            <option value={option} hidden>{payment[0]}</option>
                                             {creditOptions.filter(e => parseFloat(e.value) >= parseFloat(useThisValue) * parseFloat(last)).filter(e => e.id !== paymentId).map(e =>
                                                 <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
                                             )}
@@ -415,7 +415,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                 type === 'pending' &&
                 <>
                     {!options && !remove && !edit2 && !pay2 &&
-                        <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md">
+                        <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-200 bg-opacity-10 flex items-center mt-3 cursor-pointer rounded-3xl duration-300 md:hover:scale-105 mx-auto shadow-md">
                             <div className="w-28 flex flex-col justify-center items-center">
                                 <Image src={pending} width={40} height={40} alt='pagamento pendente' />
                                 <div className="font-semibold">Dia {details}</div>
@@ -427,7 +427,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                         </div>
                     }
                     {options && !remove && !edit2 && !pay2 &&
-                        <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
+                        <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-30 md:hover:scale-105 mx-auto shadow-md select-none">
                             <div onClick={handleEdit2}>
                                 <Image className='mx-auto' src={edit} width={40} height={40} alt='editar pagamento' />
                                 <span className='w-[40px] text-sm text-center'>Editar</span>
@@ -450,7 +450,7 @@ export default function ExpenseItem({ id, paymentId, title, value, details, type
                         </div>
                     }
                     {!options && remove && !edit2 && !pay2 &&
-                        <div onClick={handleRemove} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
+                        <div onClick={handleRemove} onMouseLeave={allOff} className="w-11/12 h-[96px] bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
                             <div className='font-bold'>
                                 Excluir?
                             </div>

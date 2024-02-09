@@ -4,12 +4,14 @@ import React, { useState } from 'react'
 import Image from "next/image";
 
 import recurso from '../../public/recurso.png'
+import invoice from '../../public/invoice.png'
 import edit from '../../public/edit.png'
 import destroy from '../../public/destroy.png'
 import confirm from '../../public/confirm.png'
 import cancel from '../../public/cancel.png'
+import ExpenseSubItem from './ExpenseSubItem';
 
-export default function ResourceItem({ id, title, value, expenses, editResource, deleteResource }) {
+export default function ResourceItem({ id, title, value, expenses, totalExpenses, editResource, deleteResource }) {
 
     const useThisValue = parseFloat(value)
 
@@ -31,10 +33,19 @@ export default function ResourceItem({ id, title, value, expenses, editResource,
         setButton(false)
     }
 
+    const [extract, setExtract] = useState(false)
+    const handleExtract = () => {
+        setExtract(!extract)
+        setName(title)
+        setFormValue(useThisValue)
+        setButton(false)
+    }
+
     const allOff = () => {
         setOptions(false)
         setRemove(false)
         setEdit2(false)
+        setExtract(false)
     }
 
     const [button, setButton] = useState(false)
@@ -63,7 +74,7 @@ export default function ResourceItem({ id, title, value, expenses, editResource,
 
     return (
         <>
-            {!options && !remove && !edit2 &&
+            {!options && !remove && !edit2 && !extract &&
                 <div onClick={handleOptions} className="w-11/12 h-24 bg-neutral-200 bg-opacity-10 flex items-center mt-3 cursor-pointer rounded-3xl duration-300 md:hover:scale-105 mx-auto shadow-md">
                     <div className="w-28 flex flex-col justify-center items-center">
                         {expenses.length !== 0 &&
@@ -77,19 +88,25 @@ export default function ResourceItem({ id, title, value, expenses, editResource,
                     </div>
                 </div >
             }
-            {options && !remove && !edit2 &&
+            {options && !remove && !edit2 && !extract &&
                 <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-30 md:hover:scale-105 mx-auto shadow-md select-none">
                     <div onClick={handleEdit2}>
                         <Image className='mx-auto' src={edit} width={40} height={40} alt='editar pagamento' />
                         <span className='w-[40px] text-sm text-center'>Editar</span>
                     </div>
+                    {expenses.length !== 0 &&
+                        <div onClick={handleExtract}>
+                            <Image className='mx-auto' src={invoice} width={40} height={40} alt='editar pagamento' />
+                            <span className='w-[40px] text-sm text-center'>Extrato</span>
+                        </div>
+                    }
                     <div onClick={handleRemove}>
                         <Image className='mx-auto' src={destroy} width={40} height={40} alt='deletar pagamento' />
                         <span className='w-[40px] text-sm text-center'>Excluir</span>
                     </div>
                 </div>
             }
-            {!options && remove && !edit2 &&
+            {!options && remove && !edit2 && !extract &&
                 <div onClick={handleRemove} onMouseLeave={allOff} className="w-11/12 h-[96px] bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
                     <div className='font-bold'>
                         Excluir?
@@ -102,7 +119,7 @@ export default function ResourceItem({ id, title, value, expenses, editResource,
                     </div>
                 </div>
             }
-            {!options && !remove && edit2 &&
+            {!options && !remove && edit2 && !extract &&
                 <div onMouseLeave={allOff} className="w-11/12 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 mx-auto shadow-md select-none">
                     <form action={(formData) => {
                         editResource(id, formData)
@@ -131,6 +148,29 @@ export default function ResourceItem({ id, title, value, expenses, editResource,
                         </div>
                     </form>
                 </div>
+            }
+            {!options && !remove && !edit2 && extract &&
+                <>
+                    <div className="w-11/12 bg-neutral-900 bg-opacity-20 flex flex-col justify-center items-start px-10 mt-3 cursor-pointer rounded-3xl duration-300 mx-auto shadow-md">
+                        <div className="w-full flex justify-center items-center">
+                            <div className='w-10/12'>
+                                <div className="font-bold mb-2 mt-5">{title}</div>
+                                <div className="text-lg mb-1">R$ {(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                <div className="text mb-5">de R$ {(value + totalExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                <div className="text mb-5">( - R$ {(totalExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</div>
+                            </div>
+                            <button onClick={handleExtract} className="w-[50px] h-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
+                                <div className='invert mx-auto'>
+                                    <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
+                                </div>
+                            </button>
+                        </div>
+                        {expenses.map(e =>
+                            <ExpenseSubItem key={e.id} title={e.name} value={e.value} details={e.details} />
+                        )}
+
+                    </div>
+                </>
             }
         </>
     )
