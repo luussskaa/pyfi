@@ -1,13 +1,16 @@
 'use client'
 
 import React, { useState } from 'react'
+import TextGroup from './TextGroup'
+import Button from './Button'
+import TotalGroup from './TotalGroup'
+import FormHeading from './forForms/FormHeading'
+import Inputs from './forForms/Inputs'
+import ConfirmButton from './forForms/ConfirmButton'
+import CancelButton from './forForms/CancelButton'
+import Click4Options from './Click4Options'
 
-import confirm from '../../public/confirm.png'
-import cancel from '../../public/cancel.png'
-import Image from 'next/image'
-import Link from 'next/link'
-
-export default function SavingCreator({ saving, savings }) {
+export default function SavingCreator({ addSaving, savings }) {
 
     const totalSavings = savings.length !== 0 ? savings.map(e => e.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'
 
@@ -50,69 +53,35 @@ export default function SavingCreator({ saving, savings }) {
         <>
             {savingForm &&
                 <form action={(formData) => {
-                    saving(formData)
-                }} onSubmit={handleSavingForm} className='w-full md:w-4/6 mb-5'>
-                    <p className="px-10 mb-2 text-lg font-semibold">Nova poupança</p>
-                    <p className="px-10  text-sm my-5">Poupanças são valores que você pretende guardar.</p>
-                    <p className="px-10  text-xs font-semibold mb-5">Preencha todos os campos corretamente.</p>
-
-                    <div className='flex flex-col px-10 mb-5'>
-                        <label className='mb-2 text-sm' htmlFor="name">Descrição</label>
-                        <input onChange={handleName} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' type="text" name="name" id="name" value={name} placeholder='Pagamento no débito' />
-                    </div>
-                    <div className='flex flex-col px-10 mb-5'>
-                        <label className='mb-2 text-sm' htmlFor="value">Valor</label>
-                        <input onChange={handleValue} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' type="number" name="value" id="value" value={value} placeholder='0,00' />
-                    </div>
-                    <div className='flex w-full justify-end pr-10'>
+                    addSaving(formData)
+                }} onSubmit={handleSavingForm} className='w-full md:w-4/6 mb-10'>
+                    <FormHeading title={'Nova poupança'} obs={'Poupanças são valores que você pretende guardar para qualquer finalidade.'} />
+                    <Inputs type={'text'} title='Descrição' handleFunc={handleName} name={'name'} value={name} placeholder={'Minha poupança'} />
+                    <Inputs type={'number'} title='Valor' handleFunc={handleValue} name={'value'} value={value} placeholder={'0,00'} />
+                    <div className='formButtonContainer'>
                         {buttonName && buttonValue &&
-                            <button className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:invert">
-                                <div className='invert mx-auto'>
-                                    <Image src={confirm} alt='confirmar' width={50} height={50} className='invert opacity-30' />
-                                </div>
-                            </button>
+                            <ConfirmButton />
                         }
-                        <button onClick={handleSavingForm} className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
-                            <div className='invert mx-auto'>
-                                <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
-                            </div>
-                        </button>
+                        <CancelButton handleCancel={handleSavingForm} />
                     </div>
                 </form>
             }
-
             {!savingForm &&
                 <>
                     {savings.length !== 0 ?
                         <>
-                            <p className="px-10 mb-3 text-xl font-semibold">Poupanças</p>
-                            <p className="px-10 mb-5 text-sm">Aqui fica o dinheiro que você tem guardado.</p>
-
-                            <div className="w-11/12 flex-nowrap justify-center items-center px-10">
-                                <button onClick={handleSavingForm} className="w-[150px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ poupança</button>
+                            <TextGroup heading={'Poupanças'} text={'Aqui fica o dinheiro que você tem guardado.'} qty={savingsQty} />
+                            <div className="buttonContainer">
+                                <Button title={'+ poupança'} handleClick={handleSavingForm} />
                             </div>
-
-                            <div className="w-full mt-10 mb-5 px-10 flex justify-between items-center">
-                                <div className="text-lg font-semibold">Total</div>
-                                <div className="w-full flex flex-col justify-center items-end">
-                                    <span>R$ {totalSavings}</span>
-                                    {savingsQty > 1 ?
-                                        <span className="text-xs">em {savingsQty} poupanças</span>
-                                        :
-                                        <span className="text-xs">em uma poupança</span>
-                                    }
-                                </div>
-                            </div>
-
-                            <p className="px-10 mb-5 text-xs">Clique em um item para mais opções.</p>
+                            <TotalGroup title={'Total'} total={totalSavings} name={'total em poupanças'} />
+                            <Click4Options />
                         </>
                         :
                         <>
-                            <p className="px-10 mb-3 font-semibold">Você não possui poupanças</p>
-                            <p className="px-10 mb-5 text-sm">Aqui ficaria o dinheiro que você tem guardado.</p>
-
-                            <div className="w-11/12 flex-nowrap justify-center items-center px-10">
-                                <button onClick={handleSavingForm} className="w-[150px] bg-neutral-900 bg-opacity-10 border-dashed border border-white shadow-md hover:scale-105 hover:bg-opacity-20 hover:shadow-md hover:border-solid rounded-full my-2 mr-3 px-5 py-2 duration-300 hover:text-opacity-20">+ poupança</button>
+                            <TextGroup heading={'Você não possui poupanças'} text={'Aqui ficaria o dinheiro que você tem guardado.'} />
+                            <div className="buttonContainer">
+                                <Button title={'+ poupança'} handleClick={handleSavingForm} />
                             </div>
                         </>
                     }

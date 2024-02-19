@@ -13,7 +13,7 @@ export default function Sticky() {
     const { user, isLoaded } = useUser()
     return (
         <>
-            <div className='w-full md:min-w-[362px] h-20 flex justify-between items-center bg-white bg-opacity-10 backdrop-blur-xl duration-300 max-[280px]:px-5 min-[281px]:px-10 shadow-md box-border sticky top-0 md:top-5 mx-auto md:rounded-full'>
+            <div className='w-full md:min-w-[362px] h-20 flex justify-between items-center bg-neutral-900 bg-opacity-30 backdrop-blur-xl duration-300 max-[280px]:px-5 min-[281px]:px-10 box-border sticky top-0 mx-auto'>
                 <div>
                     <span className='select-none text-lg'>py</span>
                     <span className='select-none text-lg'>fi</span>

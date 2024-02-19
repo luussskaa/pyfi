@@ -3,6 +3,9 @@ import { auth } from "@clerk/nextjs";
 import ExpenseItem from "@/components/ExpenseItem";
 import ExpenseCreator from "@/components/ExpenseCreator";
 import { redirect } from "next/navigation";
+import Divider from "@/components/Divider";
+import Header from "@/components/Header";
+import { parse } from "postcss";
 
 async function addDebit(rec, formData) {
 
@@ -13,7 +16,7 @@ async function addDebit(rec, formData) {
 
     const name = formData.get('name')
     const value = formData.get('value')
-    const details = formData.get('day')
+    const detailsA = formData.get('day')
     const paymentId = formData.get('option')
     const type = 'debit'
     const recurrent = rec ? 'recurrent' : null
@@ -25,7 +28,7 @@ async function addDebit(rec, formData) {
     await xataClient.db.Expenses.create({
         name,
         value: parseFloat(value),
-        details,
+        detailsA: parseFloat(detailsA),
         paymentId,
         type,
         recurrent,
@@ -61,7 +64,7 @@ async function addCredit(formData) {
 
     const name = formData.get('name')
     const value = formData.get('value')
-    const details = formData.get('day')
+    const detailsA = formData.get('day')
     const paymentId = formData.get('option')
     const type = 'credit'
 
@@ -72,7 +75,7 @@ async function addCredit(formData) {
     await xataClient.db.Expenses.create({
         name,
         value: parseFloat(value),
-        details,
+        detailsA: parseInt(detailsA),
         paymentId,
         type,
         userId
@@ -107,7 +110,8 @@ async function addInstallment(formData) {
 
     const name = formData.get('name')
     const value = formData.get('value')
-    const details = `${formData.get('current')} / ${formData.get('last')}`
+    const detailsA = formData.get('current')
+    const detailsB = formData.get('last')
     const paymentId = formData.get('option')
     const type = 'installment'
 
@@ -120,7 +124,8 @@ async function addInstallment(formData) {
     await xataClient.db.Expenses.create({
         name,
         value: parseFloat(value),
-        details,
+        detailsA: parseInt(detailsA),
+        detailsB: parseInt(detailsB),
         paymentId,
         type,
         userId
@@ -135,6 +140,8 @@ async function deleteInstallment(id, paymentId, value, last) {
     'use server'
 
     const xataClient = getXataClient()
+
+    console.log(id, paymentId, value, last)
 
     await xataClient.db.Credit.update(paymentId, {
         value: { $increment: (parseFloat(value) * parseFloat(last)) }
@@ -155,13 +162,13 @@ async function addPending(formData) {
 
     const name = formData.get('name')
     const value = formData.get('value')
-    const details = formData.get('day')
+    const detailsA = formData.get('day')
     const type = 'pending'
 
     await xataClient.db.Expenses.create({
         name,
         value: parseFloat(value),
-        details,
+        detailsA: parseInt(detailsA),
         type,
         userId
     })
@@ -190,7 +197,7 @@ async function editDebit(id, rec, formData, oldPaymentMethodId) {
 
     const name = formData.get('name')
     const value = formData.get('value')
-    const details = formData.get('day')
+    const detailsA = formData.get('day')
     const paymentId = formData.get('option')
     const recurrent = rec ? 'recurrent' : null
 
@@ -207,7 +214,7 @@ async function editDebit(id, rec, formData, oldPaymentMethodId) {
     await xataClient.db.Expenses.update(id, {
         name,
         value: parseFloat(value),
-        details,
+        detailsA: parseInt(detailsA),
         paymentId,
         recurrent,
     })
@@ -224,7 +231,7 @@ async function editCredit(id, formData, oldPaymentMethodId) {
 
     const name = formData.get('name')
     const value = formData.get('value')
-    const details = formData.get('day')
+    const detailsA = formData.get('day')
     const paymentId = formData.get('option')
 
     const oldExpense = await xataClient.db.Expenses.read(id)
@@ -240,7 +247,7 @@ async function editCredit(id, formData, oldPaymentMethodId) {
     await xataClient.db.Expenses.update(id, {
         name,
         value: parseFloat(value),
-        details,
+        detailsA: parseInt(detailsA),
         paymentId
     })
 
@@ -310,12 +317,16 @@ export default async function page() {
     const { userId } = auth()
     const xataClient = getXataClient()
 
-    const exp = await xataClient.db.Expenses.filter({ userId }).getMany()
+    const currentMonth = await xataClient.db.CurrentMonth.filter({ userId }).getMany()
 
-    const paidExpenses = exp.filter(e => e.type !== 'pending').reverse()
-    const unpaidExpenses = exp.filter(e => e.type === 'pending')
+    const expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
 
-    const expenses = [...unpaidExpenses, ...paidExpenses]
+    const paidExpenses = expenses.filter(e => e.type !== 'pending').reverse()
+
+    const unpaidExpenses = expenses.filter(e => e.type === 'pending')
+    const debitExpenses = paidExpenses.filter(e => e.type === 'debit')
+    const creditExpenses = paidExpenses.filter(e => e.type === 'credit')
+    const installments = paidExpenses.filter(e => e.type === 'installment')
 
     const resources = await xataClient.db.Resources.filter({ userId }).getMany()
     const credit = await xataClient.db.Credit.filter({ userId }).getMany()
@@ -328,32 +339,35 @@ export default async function page() {
 
     return (
         <>
-            <div className="w-full flex flex-col justify-center items-center mb-10">
-                <div className="text-4xl font-semibold mb-2">Meus gastos</div>
-                <div className="text-lg">R$ {expenses.length !== 0 ? expenses.map(expense => expense.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'}</div>
-            </div>
+            <Header month={currentMonth.length !== 0 && `${currentMonth[0].month} / ${currentMonth[0].year}`} title="Meus gastos" value={expenses.length !== 0 ? expenses.map(expense => expense.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'} />
 
-            <div className="w-11/12 mx-auto border border-white border-x-0 border-t-0 mb-10"></div>
+            <Divider />
 
             <div className="w-full h-auto">
                 <ExpenseCreator
                     resources={JSON.parse(JSON.stringify(resources))}
                     expenses={JSON.parse(JSON.stringify(expenses))}
-                    credits={JSON.parse(JSON.stringify(credit))}
-                    debit={addDebit}
-                    credit={addCredit}
-                    installment={addInstallment}
-                    pending={addPending}
+                    credit={JSON.parse(JSON.stringify(credit))}
+                    addDebit={addDebit}
+                    addCredit={addCredit}
+                    addInstallment={addInstallment}
+                    addPending={addPending}
                     debitOptions={JSON.parse(JSON.stringify(resources))}
                     creditOptions={JSON.parse(JSON.stringify(credit))}
                     maxResource={maxResource}
-                    maxCredit={maxCredit} />
+                    maxCredit={maxCredit}
+                    debitExpenses={JSON.parse(JSON.stringify(debitExpenses))}
+                    creditExpenses={JSON.parse(JSON.stringify(creditExpenses))}
+                    installments={JSON.parse(JSON.stringify(installments))}
+                    pendingExpenses={JSON.parse(JSON.stringify(unpaidExpenses))}
+                />
                 {expenses.length !== 0 && expenses.map(expense => (
                     <ExpenseItem key={expense.id} id={expense.id}
                         paymentId={expense.paymentId}
                         title={expense.name}
                         value={(expense.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        details={expense.details}
+                        detailsA={expense.detailsA}
+                        detailsB={expense.detailsB}
                         type={expense.type}
                         payment={expense.type === 'debit' ? resources.filter(e => e.id === expense.paymentId).map(e => `${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`) : expense.type === 'credit' ? credit.filter(e => e.id === expense.paymentId).map(e => `${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`) : expense.type === 'installment' && credit.filter(e => e.id === expense.paymentId).map(e => `${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`)}
                         editDebit={editDebit}

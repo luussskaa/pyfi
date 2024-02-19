@@ -1,19 +1,13 @@
-import Header from "@/components/Header";
 import ResourceItem from "@/components/ResourceItem";
 import SavingItem from "@/components/SavingItem";
-import Sticky from "@/components/Sticky";
 import { getXataClient } from "@/xata";
-import { auth, currentUser } from "@clerk/nextjs";
-import TextGroup from "@/components/TextGroup";
-
-import recurso from '../../public/recurso.png'
-import poupanca from '../../public/poupanca.png'
-import edit from '../../public/edit.png'
-import Image from "next/image";
+import { auth } from "@clerk/nextjs";
 import ResourceCreator from "@/components/ResourceCreator";
 import { redirect } from "next/navigation";
 import SavingCreator from "@/components/SavingCreator";
 import Close from "@/components/Close";
+import Divider from "@/components/Divider";
+import Header from "@/components/Header";
 
 async function addResource(formData) {
 
@@ -32,7 +26,6 @@ async function addResource(formData) {
   })
 
   redirect('/')
-
 
 }
 
@@ -61,6 +54,27 @@ async function deleteResource(id) {
   const xataClient = getXataClient()
 
   await xataClient.db.Resources.delete(id)
+
+  redirect('/')
+
+}
+
+async function saveResource(id, formData) {
+
+  'use server'
+
+  const xataClient = getXataClient()
+
+  const value = formData.get('value')
+  const savingId = formData.get('option')
+
+  await xataClient.db.Resources.update(id, {
+    value: { $decrement: parseFloat(value) }
+  })
+
+  await xataClient.db.Savings.update(savingId, {
+    value: { $increment: parseFloat(value) }
+  })
 
   redirect('/')
 
@@ -282,25 +296,15 @@ export default async function Home() {
 
   return (
     <>
-      <div className="w-full flex flex-col justify-center items-center mb-10">
-        <div className="text-sm font-semibold mb-2">{currentMonth.length !== 0 && currentMonth[0].name}</div>
-        <div className="text-4xl font-semibold mb-2">Meu dinheiro</div>
-        <div className="text-lg">R$ {resources.length !== 0 ? (resources.map(e => e.value).reduce((a, b) => a + b) + savings.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'}</div>
-      </div>
+      <Header month={currentMonth.length !== 0 && `${currentMonth[0].month} / ${currentMonth[0].year}`} title="Meu dinheiro" value={resources.length !== 0 && savings.length === 0 ? (resources.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : resources.length === 0 && savings.length !== 0 ? (savings.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : resources.length !== 0 && savings.length !== 0 ? (resources.map(e => e.value).reduce((a, b) => a + b) + savings.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'} />
 
+      {/* <Close currentMonth={JSON.parse(JSON.stringify(currentMonth))} endMonth={endMonth} /> */}
 
-      <div className="w-full flex mb-10 flex-col items-center justify-center">
-        <p className="px-10 mb-3 font-semibold">⚠ Você já concluiu as atividades deste mês?</p>
-        <p className="px-10 mb-5 text-xs">Clique no botão abaixo para concluir o mês atual e começar o mês seguinte.</p>
-
-        <Close currentMonth={JSON.parse(JSON.stringify(currentMonth))} endMonth={endMonth} />
-
-      </div>
-
-      <div className="w-11/12 mx-auto border border-white border-x-0 border-t-0 mb-10"></div>
+      <Divider />
 
       <div className="w-full h-auto">
-        <ResourceCreator resource={addResource}
+        <ResourceCreator
+          addResource={addResource}
           resources={JSON.parse(JSON.stringify(resources))} />
         {resources.length !== 0 && resources.map(resource => (
           <ResourceItem
@@ -308,17 +312,22 @@ export default async function Home() {
             id={resource.id}
             title={resource.name}
             value={resource.value}
+            savingOptions={JSON.parse(JSON.stringify(savings))}
             expenses={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === resource.id)))}
             totalExpenses={totalExpenses}
             editResource={editResource}
-            deleteResource={deleteResource} />
+            deleteResource={deleteResource}
+            saveResource={saveResource}
+            savings={JSON.parse(JSON.stringify(savings))}
+          />
         ))}
       </div>
 
-      <div className="w-11/12 mx-auto border border-white border-x-0 border-t-0 my-10"></div>
+      <Divider />
 
       <div className="w-full h-auto">
-        <SavingCreator saving={addSaving}
+        <SavingCreator
+          addSaving={addSaving}
           savings={JSON.parse(JSON.stringify(savings))} />
         {savings.length !== 0 && savings.map(saving => (
           <SavingItem

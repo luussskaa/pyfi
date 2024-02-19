@@ -11,7 +11,7 @@ import Image from 'next/image'
 export default function Navbar() {
     return (
         <div className='w-full flex md:hidden justify-center items-center'>
-            <div className='w-full bottom-0 rounded-none md:w-[362px] h-20 flex justify-evenly items-center bg-white bg-opacity-10 backdrop-blur-xl shadow-md md:rounded-full md:bottom-8 fixed duration-300'>
+            <div className='w-full bottom-0 rounded-none md:w-[362px] h-20 flex justify-evenly items-center bg-neutral-900 bg-opacity-30 backdrop-blur-xl md:bottom-8 fixed duration-300'>
                 <Link href='/'>
                     <Image src={dinheiro} alt='dinheiro' width={40} height={40} className='invert opacity-30 hover:opacity-100 duration-300' />
                 </Link>

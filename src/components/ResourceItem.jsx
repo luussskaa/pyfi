@@ -1,17 +1,15 @@
 'use client'
 
 import React, { useState } from 'react'
-import Image from "next/image";
+import ResourceCard from './forItems/ResourceCard';
+import OptionsCard from './forItems/OptionsCard';
+import RemoveCard from './forItems/RemoveCard';
+import Inputs from './forForms/Inputs';
+import ConfirmButton from './forForms/ConfirmButton';
+import CancelButton from './forForms/CancelButton';
+import ExtractCard from './forItems/ExtractCard';
 
-import recurso from '../../public/recurso.png'
-import invoice from '../../public/invoice.png'
-import edit from '../../public/edit.png'
-import destroy from '../../public/destroy.png'
-import confirm from '../../public/confirm.png'
-import cancel from '../../public/cancel.png'
-import ExpenseSubItem from './ExpenseSubItem';
-
-export default function ResourceItem({ id, title, value, expenses, totalExpenses, editResource, deleteResource }) {
+export default function ResourceItem({ id, title, value, savingOptions, expenses, totalExpenses, editResource, deleteResource, saveResource, savings }) {
 
     const useThisValue = parseFloat(value)
 
@@ -41,11 +39,20 @@ export default function ResourceItem({ id, title, value, expenses, totalExpenses
         setButton(false)
     }
 
+    const [save, setSave] = useState(false)
+    const handleSave = () => {
+        setSave(!save)
+        setName(title)
+        setFormValue(useThisValue)
+        setButton(false)
+    }
+
     const allOff = () => {
         setOptions(false)
         setRemove(false)
         setEdit2(false)
         setExtract(false)
+        setSave(false)
     }
 
     const [button, setButton] = useState(false)
@@ -72,105 +79,71 @@ export default function ResourceItem({ id, title, value, expenses, totalExpenses
         }
     }
 
+    const [buttonOption, setButtonOption] = useState()
+    const handleOption = (e) => {
+        setButtonOption(e.target.value)
+        setButton(true)
+    }
+
     return (
         <>
-            {!options && !remove && !edit2 && !extract &&
-                <div onClick={handleOptions} className="w-11/12 h-24 bg-neutral-200 bg-opacity-10 flex items-center mt-3 cursor-pointer rounded-3xl duration-300 md:hover:scale-105 mx-auto shadow-md">
-                    <div className="w-28 flex flex-col justify-center items-center">
-                        {expenses.length !== 0 &&
-                            <span className="inline-block font-semibold">{expenses.length}X</span>
-                        }
-                        <Image src={recurso} width={40} height={40} alt='recurso' />
-                    </div>
-                    <div className="w-4/6">
-                        <div className="font-bold mb-2 mt-5">{title}</div>
-                        <div className="text-lg mb-5">R$ {(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                    </div>
-                </div >
+            {!options && !remove && !edit2 && !extract && !save &&
+                <ResourceCard handleOptions={handleOptions} title={title} value={value} expenses={expenses} />
             }
-            {options && !remove && !edit2 && !extract &&
-                <div onClick={handleOptions} onMouseLeave={allOff} className="w-11/12 h-24 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-30 md:hover:scale-105 mx-auto shadow-md select-none">
-                    <div onClick={handleEdit2}>
-                        <Image className='mx-auto' src={edit} width={40} height={40} alt='editar pagamento' />
-                        <span className='w-[40px] text-sm text-center'>Editar</span>
-                    </div>
-                    {expenses.length !== 0 &&
-                        <div onClick={handleExtract}>
-                            <Image className='mx-auto' src={invoice} width={40} height={40} alt='editar pagamento' />
-                            <span className='w-[40px] text-sm text-center'>Extrato</span>
-                        </div>
-                    }
-                    <div onClick={handleRemove}>
-                        <Image className='mx-auto' src={destroy} width={40} height={40} alt='deletar pagamento' />
-                        <span className='w-[40px] text-sm text-center'>Excluir</span>
-                    </div>
-                </div>
+            {options && !remove && !edit2 && !extract && !save &&
+                <OptionsCard allOff={allOff} handleOptions={handleOptions} handleRemove={handleRemove} handleEdit2={handleEdit2} handleExtract={handleExtract} expenses={expenses} handleSave={value !== 0 && handleSave} savings={savings} />
             }
-            {!options && remove && !edit2 && !extract &&
-                <div onClick={handleRemove} onMouseLeave={allOff} className="w-11/12 h-[96px] bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md select-none">
-                    <div className='font-bold'>
-                        Excluir?
-                    </div>
-                    <div onClick={() => deleteResource(id)} className='duration-300 hover:-translate-y-2'>
-                        <Image className='mx-auto' src={confirm} width={40} height={40} alt='confirmar deleção' />
-                    </div>
-                    <div className='duration-300 hover:-translate-y-2' onClick={handleRemove}>
-                        <Image className='mx-auto' src={cancel} width={40} height={40} alt='cancelar deleção' />
-                    </div>
-                </div>
+            {!options && remove && !edit2 && !extract && !save &&
+                <RemoveCard allOff={allOff} handleRemove={handleRemove} destroy={deleteResource} id={id} />
             }
-            {!options && !remove && edit2 && !extract &&
-                <div onMouseLeave={allOff} className="w-11/12 bg-neutral-900 bg-opacity-20 flex justify-evenly items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 mx-auto shadow-md select-none">
+            {!options && !remove && edit2 && !extract && !save &&
+                <div onMouseLeave={allOff} className="editFormContainer">
                     <form action={(formData) => {
                         editResource(id, formData)
                     }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>
-                        <div className='flex flex-col px-10 mb-5'>
-                            <label className='mb-2 text-sm' htmlFor="name">Descrição</label>
-                            <input onChange={handleName} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' type="text" name="name" id="name" value={name} placeholder='Pagamento no débito' />
-                        </div>
-                        <div className='flex flex-col px-10 mb-5'>
-                            <label className='mb-2 text-sm' htmlFor="value">Valor</label>
-                            <input onChange={handleValue} className='h-8 bg-white bg-opacity-20 rounded-md shadow-inner shadow-neutral-900 px-2' type="number" name="value" id="value" value={formValue} placeholder='0,00' />
-                        </div>
-                        <div className='flex w-full justify-end pr-10'>
+
+                        <Inputs type={'text'} title={'Descrição'} handleFunc={handleName} name={'name'} value={name} />
+
+                        <Inputs type={'number'} title={'Valor'} handleFunc={handleValue} name={'value'} value={formValue} />
+
+                        <div className='formButtonContainer'>
                             {button &&
-                                <button className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:invert">
-                                    <div className='invert mx-auto'>
-                                        <Image src={confirm} alt='confirmar' width={50} height={50} className='invert opacity-30' />
-                                    </div>
-                                </button>
+                                <ConfirmButton />
                             }
-                            <button onClick={handleEdit2} className="w-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
-                                <div className='invert mx-auto'>
-                                    <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
-                                </div>
-                            </button>
+                            <CancelButton handleCancel={handleEdit2} />
                         </div>
                     </form>
                 </div>
             }
-            {!options && !remove && !edit2 && extract &&
-                <>
-                    <div className="w-11/12 bg-neutral-900 bg-opacity-20 flex flex-col justify-center items-start px-10 mt-3 cursor-pointer rounded-3xl duration-300 mx-auto shadow-md">
-                        <div className="w-full flex justify-center items-center">
-                            <div className='w-10/12'>
-                                <div className="font-bold mb-2 mt-5">{title}</div>
-                                <div className="text-lg mb-1">R$ {(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                                <div className="text mb-5">de R$ {(value + totalExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                                <div className="text mb-5">( - R$ {(totalExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</div>
-                            </div>
-                            <button onClick={handleExtract} className="w-[50px] h-[50px] bg-neutral-900 bg-opacity-20 border-dashed border border-neutral-500 shadow-md hover:scale-105 hover:bg-opacity-50 hover:shadow-md hover:border-solid rounded-full m-2 p-2 duration-300 hover:text-opacity-20 hover:rotate-180">
-                                <div className='invert mx-auto'>
-                                    <Image src={cancel} alt='cancelar' width={50} height={50} className='invert opacity-30' />
-                                </div>
-                            </button>
-                        </div>
-                        {expenses.map(e =>
-                            <ExpenseSubItem key={e.id} title={e.name} value={e.value} details={e.details} />
-                        )}
+            {!options && !remove && !edit2 && extract && !save &&
+                <ExtractCard allOff={allOff} title={title} value={value} expenses={expenses} totalExpenses={totalExpenses} handleExtract={handleExtract} />
+            }
+            {!options && !remove && !edit2 && !extract && save &&
+                <div onMouseLeave={allOff} className="editFormContainer">
+                    <form action={(formData) => {
+                        saveResource(id, formData)
+                    }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>
 
-                    </div>
-                </>
+                        <Inputs type={'number'} title={'Valor a guardar'} handleFunc={handleValue} name={'value'} value={formValue} />
+
+                        <div className='container'>
+                            <label htmlFor="option">Guardar na poupança:</label>
+                            <select onChange={handleOption} name="option" id="option">
+                                <option defaultValue={'Selecione...'} hidden>Selecione...</option>
+                                {savingOptions.map(e =>
+                                    <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                                )}
+                            </select>
+                        </div>
+
+                        <div className='formButtonContainer'>
+                            {button && buttonOption && formValue <= useThisValue &&
+                                <ConfirmButton />
+                            }
+                            <CancelButton handleCancel={handleSave} />
+                        </div>
+                    </form>
+                </div>
             }
         </>
     )
