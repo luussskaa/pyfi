@@ -55,7 +55,7 @@ export default function ResourceCreator({ addResource, resources }) {
                 <form action={(formData) => {
                     addResource(formData)
                 }} onSubmit={handleResourceForm} className='w-full md:w-4/6 mb-10'>
-                    <FormHeading title={'Novo recurso'} obs={'Recursos são utilizados para pagamentos no débito.'} />
+                    <FormHeading title={'Novo recurso'} obs={'Utilize seus recursos para informar a existência de pagamentos no débito e para quitar pagamentos pendentes em "Meus gastos".'} />
                     <Inputs type={'text'} title='Descrição' handleFunc={handleName} name={'name'} value={name} placeholder={'Meu dinheiro'} />
                     <Inputs type={'number'} title='Valor' handleFunc={handleValue} name={'value'} value={value} placeholder={'0,00'} />
                     <div className='formButtonContainer'>
@@ -79,7 +79,7 @@ export default function ResourceCreator({ addResource, resources }) {
                         </>
                         :
                         <>
-                            <TextGroup heading={'Você não possui recursos'} text={'Recursos representam o dinheiro que você pretende utilizar e são necessários para adicionar gastos pagos no débito e para quitar pagamentos pendentes.'} />
+                            <TextGroup heading={'Você não possui recursos'} text={'Você precisa de recursos para adicionar pagamentos no débito e para quitar pagamentos pendentes.'} />
                             <div className="buttonContainer">
                                 <Button title={'+ recurso'} handleClick={handleResourceForm} />
                             </div>

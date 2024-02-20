@@ -9,7 +9,7 @@ import ConfirmButton from './forForms/ConfirmButton';
 import CancelButton from './forForms/CancelButton';
 import ExtractCard from './forItems/ExtractCard';
 
-export default function ResourceItem({ id, title, value, resourceOptions, savingOptions, expenses, totalExpenses, editResource, deleteResource, saveResource, savings }) {
+export default function ResourceItem({ id, title, value, resourceOptions, savingOptions, expenses, totalExpenses, editResource, deleteResource, saveResource, savings, transferResource }) {
 
     const useThisValue = parseFloat(value)
 
@@ -100,7 +100,7 @@ export default function ResourceItem({ id, title, value, resourceOptions, saving
                 <ResourceCard handleOptions={handleOptions} title={title} value={value} expenses={expenses} />
             }
             {options && !remove && !edit2 && !extract && !save && !transfer &&
-                <OptionsCard allOff={allOff} handleOptions={handleOptions} handleRemove={handleRemove} handleEdit2={handleEdit2} handleExtract={handleExtract} expenses={expenses} handleSave={value !== 0 && handleSave} savings={savings} handleTransfer={handleTransfer} />
+                <OptionsCard allOff={allOff} handleOptions={handleOptions} handleRemove={handleRemove} handleEdit2={handleEdit2} handleExtract={handleExtract} expenses={expenses} handleSave={value !== 0 && handleSave} savings={savings} handleTransfer={resourceOptions.length > 1 && handleTransfer} />
             }
             {!options && remove && !edit2 && !extract && !save && !transfer &&
                 <RemoveCard allOff={allOff} handleRemove={handleRemove} destroy={deleteResource} id={id} />
@@ -157,7 +157,7 @@ export default function ResourceItem({ id, title, value, resourceOptions, saving
             {!options && !remove && !edit2 && !extract && !save && transfer &&
                 <div onMouseLeave={allOff} className="editFormContainer">
                     <form action={(formData) => {
-                        saveResource(id, formData)
+                        transferResource(id, formData)
                     }} onSubmit={handleTransfer} className='w-full md:w-4/6 my-10'>
 
                         <Inputs type={'number'} title={'Valor a transferir'} handleFunc={handleValue} name={'value'} value={formValue} />

@@ -199,10 +199,8 @@ export default function ExpenseCreator({ resources, expenses, credit, addDebit, 
 
             {!debitForm && !creditForm && !installmentForm && !pendingForm &&
                 <>
-                    {resources.length !== 0 && credit.length !== 0 &&
 
-                        <TextGroup heading={'Adicionar gastos'} text={'Adicione um novo gasto pelo tipo de pagamento:'} />
-                    }
+                    <TextGroup heading={'Adicionar gastos'} text={'Adicione um novo gasto pelo tipo de pagamento:'} />
 
                     {resources.length === 0 &&
                         <MissingPayment text={'⚠ Você precisa de um recurso para poder adicionar pagamentos no débito e para quitar pagamentos pendentes!'} />

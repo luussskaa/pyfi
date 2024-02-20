@@ -15,7 +15,7 @@ export default function InstallmentForm({ addInstallment, handleInstallmentForm,
             addInstallment(formData)
         }} onSubmit={handleInstallmentForm} className='w-full md:w-4/6 mb-10'>
 
-            <FormHeading title={'Novo parcelamento'} obs={'⚠ O valor total de um parcelamento (valor da parcela X n° de parcelas) é deduzido automaticamente da opção de crédito utilizada como forma de pagamento.'} />
+            <FormHeading title={'Novo parcelamento'} obs={'⚠ O valor total deste parcelamento (valor da parcela X n° de parcelas) será deduzido automaticamente da opção de crédito utilizada como forma de pagamento.'} />
 
             <Inputs type={'text'} title='Descrição' handleFunc={handleName} name={'name'} value={name} placeholder={'Parcelamento'} />
 

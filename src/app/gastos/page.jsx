@@ -318,6 +318,16 @@ async function payPending(id, formData) {
 
     const pending = await xataClient.db.Expenses.read(id)
 
+    if (pending.name.includes('Fatura:')) {
+        try {
+            await xataClient.db.Credit.update(id, {
+                value: { $increment: parseFloat(pending.value) }
+            })
+        } catch (error) {
+            return
+        }
+    }
+
     await xataClient.db.Resources.update(paymentId, {
         value: { $decrement: parseFloat(pending.value) }
     })

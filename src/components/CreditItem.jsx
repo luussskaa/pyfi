@@ -10,7 +10,7 @@ import DoubleInput from '../components/forForms/DoubleInput';
 import ConfirmButton from '../components/forForms/ConfirmButton';
 import CancelButton from '../components/forForms/CancelButton';
 
-export default function CreditItem({ id, title, value, total, detailsA, expenses, editCredit, deleteCredit }) {
+export default function CreditItem({ id, title, value, total, detailsA, expenses, editCredit, deleteCredit, invoiceValues }) {
 
     const useThisValue = parseFloat(total)
 
@@ -139,7 +139,7 @@ export default function CreditItem({ id, title, value, total, detailsA, expenses
             }
             {!options && !remove && !edit2 && extract &&
                 <>
-                    <ExtractCard allOff={allOff} title={title} value={value} total={total} expenses={expenses} handleExtract={handleExtract} />
+                    <ExtractCard allOff={allOff} title={title} value={value} total={total} expenses={expenses} handleExtract={handleExtract} invoice={invoiceValues} />
                 </>
             }
         </>

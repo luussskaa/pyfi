@@ -8,6 +8,7 @@ import SavingCreator from "@/components/SavingCreator";
 import Close from "@/components/Close";
 import Divider from "@/components/Divider";
 import Header from "@/components/Header";
+import { revalidatePath } from "next/cache";
 
 async function addResource(formData) {
 
@@ -73,6 +74,27 @@ async function saveResource(id, formData) {
   })
 
   await xataClient.db.Savings.update(savingId, {
+    value: { $increment: parseFloat(value) }
+  })
+
+  redirect('/')
+
+}
+
+async function transferResource(id, formData) {
+
+  'use server'
+
+  const xataClient = getXataClient()
+
+  const value = formData.get('value')
+  const resourceId = formData.get('option')
+
+  await xataClient.db.Resources.update(id, {
+    value: { $decrement: parseFloat(value) }
+  })
+
+  await xataClient.db.Resources.update(resourceId, {
     value: { $increment: parseFloat(value) }
   })
 
@@ -171,7 +193,6 @@ async function addInitialMonth() {
   const xataClient = getXataClient()
 
   await xataClient.db.CurrentMonth.create({
-    name: `${months[currentMonth]} / ${currentYear}`,
     month: months[currentMonth],
     year: currentYear,
     userId
@@ -198,20 +219,17 @@ async function endMonth(id) {
   if (finishedMonth[0].year !== currentYear) {
     if (finishedMonth[0].month === 'Dezembro') {
       await xataClient.db.CurrentMonth.update(id, {
-        name: `${months[0]} / ${currentYear}`,
         month: months[0],
         year: currentYear
       })
     } else {
       await xataClient.db.CurrentMonth.update(id, {
-        name: `${months[currentMonth]} / ${currentYear}`,
         month: months[currentMonth],
         year: currentYear
       })
     }
   } else {
     await xataClient.db.CurrentMonth.update(id, {
-      name: `${months[currentMonth + 1]} / ${currentYear}`,
       month: months[currentMonth + 1]
     })
   }
@@ -230,17 +248,21 @@ async function endMonth(id) {
   }
 
   for (let i = 0; i < pendingExpenses.length; i++) {
-    await xataClient.db.Expenses.update(pendingExpenses[i].id, {
-      details: `${pendingExpenses[i].details} (${finishedMonth[0].name.slice(0, 3)})`,
-    })
+    if (pendingExpenses[i].name.includes('(Janeiro)') || pendingExpenses[i].name.includes('(Fevereiro)') || pendingExpenses[i].name.includes('(Março)') || pendingExpenses[i].name.includes('(Abril)') || pendingExpenses[i].name.includes('(Maio)') || pendingExpenses[i].name.includes('(Junho)') || pendingExpenses[i].name.includes('(Julho)') || pendingExpenses[i].name.includes('(Agosto)') || pendingExpenses[i].name.includes('(Setembro)') || pendingExpenses[i].name.includes('(Outubro)') || pendingExpenses[i].name.includes('(Novembro)') || pendingExpenses[i].name.includes('(Dezembro)')) {
+      return
+    } else {
+      await xataClient.db.Expenses.update(pendingExpenses[i].id, {
+        name: `${pendingExpenses[i].name} (${finishedMonth[0].month})`,
+      })
+    }
   }
 
   for (let i = 0; i < installments.length; i++) {
-    if (parseInt(installments[i].details.slice(0, installments[i].details.indexOf('/')) === parseInt(installments[i].details.slice(installments[i].details.indexOf('/') + 3)))) {
+    if (parseInt(installments[i].detailsA === parseInt(installments[i].detailsB))) {
       await xataClient.db.Expenses.delete(installments[i].id)
     } else {
       await xataClient.db.Expenses.update(installments[i].id, {
-        details: `${parseInt(installments[i].details.slice(0, installments[i].details.indexOf('/'))) + 1} / ${installments[i].details.slice(installments[i].details.indexOf('/') + 1)}`
+        detailsA: installments[i].detailsA + 1
       })
     }
 
@@ -250,9 +272,9 @@ async function endMonth(id) {
           const checkInvoice = await xataClient.db.Expenses.read(credit[i].id)
           if (checkInvoice === null) {
             const createInvoice = await xataClient.db.Expenses.create(credit[i].id, {
-              name: `Fatura ${credit[i].name} (${finishedMonth[0].name.slice(0, 3)})`,
+              name: `Fatura: ${credit[i].name} (${finishedMonth[0].month})`,
               value: invoiceExpenses[i].value,
-              details: `${credit[i].details.slice(credit[i].details.indexOf('/'), credit[i].details.indexOf('/') + 1)}`,
+              detailsA: credit[i].detailsA,
               type: 'pending',
               paymentId: credit[i].id,
               userId
@@ -298,7 +320,7 @@ export default async function Home() {
     <>
       <Header month={currentMonth.length !== 0 && `${currentMonth[0].month} / ${currentMonth[0].year}`} title="Meu dinheiro" value={resources.length !== 0 && savings.length === 0 ? (resources.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : resources.length === 0 && savings.length !== 0 ? (savings.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : resources.length !== 0 && savings.length !== 0 ? (resources.map(e => e.value).reduce((a, b) => a + b) + savings.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'} />
 
-      {/* <Close currentMonth={JSON.parse(JSON.stringify(currentMonth))} endMonth={endMonth} /> */}
+      <Close currentMonth={JSON.parse(JSON.stringify(currentMonth))} endMonth={endMonth} />
 
       <Divider />
 
@@ -315,11 +337,12 @@ export default async function Home() {
             resourceOptions={JSON.parse(JSON.stringify(resources))}
             savingOptions={JSON.parse(JSON.stringify(savings))}
             expenses={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === resource.id)))}
-            totalExpenses={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === resource.id).map(e => parseFloat(e.value)).reduce((a, b) => a + b)))}
+            totalExpenses={expenses.filter(expense => expense.paymentId === resource.id).length !== 0 ? JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === resource.id).map(e => parseFloat(e.value)).reduce((a, b) => a + b))) : 0}
             editResource={editResource}
             deleteResource={deleteResource}
             saveResource={saveResource}
             savings={JSON.parse(JSON.stringify(savings))}
+            transferResource={transferResource}
           />
         ))}
       </div>
