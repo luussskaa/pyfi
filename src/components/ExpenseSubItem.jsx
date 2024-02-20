@@ -12,7 +12,7 @@ export default function ExpenseSubItem({ title, value, type, detailsA, detailsB 
                     type === 'pending' ?
                         <div className="text-sm font-semibold mb-2 mt-5">{title}</div>
                         :
-                        type === undefined &&
+                        type === 'debit' &&
                         <div className="text-sm font-semibold mb-2 mt-5">{title}</div>
             }
             {type !== 'installment' ?

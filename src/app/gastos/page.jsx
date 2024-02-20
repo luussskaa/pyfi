@@ -5,7 +5,6 @@ import ExpenseCreator from "@/components/ExpenseCreator";
 import { redirect } from "next/navigation";
 import Divider from "@/components/Divider";
 import Header from "@/components/Header";
-import { parse } from "postcss";
 
 async function addDebit(rec, formData) {
 
@@ -263,30 +262,27 @@ async function editInstallment(id, formData, oldPaymentMethodId) {
 
     const name = formData.get('name')
     const value = formData.get('value')
-    const details = `${formData.get('current')} / ${formData.get('last')}`
+    const detailsA = formData.get('current')
+    const detailsB = formData.get('last')
     const paymentId = formData.get('option')
 
     const oldExpense = await xataClient.db.Expenses.read(id)
 
-    const oldSlash = oldExpense.details.indexOf(' / ')
-
     await xataClient.db.Credit.update(oldPaymentMethodId, {
-        value: { $increment: parseFloat(oldExpense.value) * parseFloat(oldExpense.details.slice(oldSlash + 3)) }
+        value: { $increment: parseFloat(oldExpense.value) * parseInt(oldExpense.detailsB) }
     })
 
-    const slash = details.indexOf(' / ')
-
     await xataClient.db.Credit.update(paymentId, {
-        value: { $decrement: parseFloat(value) * parseFloat(details.slice(slash + 3)) }
+        value: { $decrement: parseFloat(value) * parseInt(detailsB) }
     })
 
     await xataClient.db.Expenses.update(id, {
         name,
         value: parseFloat(value),
-        details,
+        detailsA: parseInt(detailsA),
+        detailsB: parseInt(detailsB),
         paymentId
     })
-
 
     redirect('/gastos')
 
@@ -300,12 +296,35 @@ async function editPending(id, formData) {
 
     const name = formData.get('name')
     const value = formData.get('value')
-    const details = formData.get('day')
+    const detailsA = formData.get('day')
 
     await xataClient.db.Expenses.update(id, {
         name,
         value: parseFloat(value),
-        details,
+        detailsA: parseInt(detailsA)
+    })
+
+    redirect('/gastos')
+
+}
+
+async function payPending(id, formData) {
+
+    'use server'
+
+    const xataClient = getXataClient()
+
+    const paymentId = formData.get('option')
+
+    const pending = await xataClient.db.Expenses.read(id)
+
+    await xataClient.db.Resources.update(paymentId, {
+        value: { $decrement: parseFloat(pending.value) }
+    })
+
+    await xataClient.db.Expenses.update(id, {
+        type: 'debit',
+        paymentId: paymentId
     })
 
     redirect('/gastos')
@@ -319,17 +338,19 @@ export default async function page() {
 
     const currentMonth = await xataClient.db.CurrentMonth.filter({ userId }).getMany()
 
-    const expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
+    const exp = await xataClient.db.Expenses.filter({ userId }).getMany()
 
-    const paidExpenses = expenses.filter(e => e.type !== 'pending').reverse()
+    const paidExpenses = exp.filter(e => e.type !== 'pending').reverse()
 
-    const unpaidExpenses = expenses.filter(e => e.type === 'pending')
+    const unpaidExpenses = exp.filter(e => e.type === 'pending')
     const debitExpenses = paidExpenses.filter(e => e.type === 'debit')
     const creditExpenses = paidExpenses.filter(e => e.type === 'credit')
     const installments = paidExpenses.filter(e => e.type === 'installment')
 
     const resources = await xataClient.db.Resources.filter({ userId }).getMany()
     const credit = await xataClient.db.Credit.filter({ userId }).getMany()
+
+    const expenses = [...unpaidExpenses, ...paidExpenses]
 
     const resourcesValues = resources.length !== 0 ? resources.map(e => e.value) : [0]
     const creditValues = credit.length !== 0 ? credit.map(e => e.value) : [0]
@@ -379,6 +400,7 @@ export default async function page() {
                         deleteInstallment={deleteInstallment}
                         editPending={editPending}
                         deletePending={deletePending}
+                        payPending={payPending}
                         debitOptions={JSON.parse(JSON.stringify(resources))}
                         creditOptions={JSON.parse(JSON.stringify(credit))}
                         maxResource={maxResource}

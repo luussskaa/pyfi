@@ -15,7 +15,7 @@ import ConfirmButton from './forForms/ConfirmButton';
 import CancelButton from './forForms/CancelButton';
 import DoubleInput from './forForms/DoubleInput';
 
-export default function ExpenseItem({ id, paymentId, title, value, detailsA, detailsB, type, payment, editDebit, deleteDebit, recurrentDebit, editCredit, deleteCredit, editInstallment, deleteInstallment, editPending, deletePending, debitOptions, maxResource, creditOptions, maxCredit }) {
+export default function ExpenseItem({ id, paymentId, title, value, detailsA, detailsB, type, editDebit, deleteDebit, recurrentDebit, editCredit, deleteCredit, editInstallment, deleteInstallment, editPending, deletePending, payPending, debitOptions, maxResource, creditOptions, maxCredit }) {
 
     const useThisValue = parseFloat(value.replace(',', '.'))
 
@@ -35,7 +35,7 @@ export default function ExpenseItem({ id, paymentId, title, value, detailsA, det
         setName(title)
         setFormValue(useThisValue)
         setDay(detailsA)
-        setOption(payment[0])
+        setOption(false)
         setCurrent(detailsA)
         setLast(detailsB)
         setRecurrent(recurrentDebit)
@@ -97,7 +97,7 @@ export default function ExpenseItem({ id, paymentId, title, value, detailsA, det
         }
     }
 
-    const [option, setOption] = useState(paymentId)
+    const [option, setOption] = useState(false)
     const handleOption = (e) => {
         setOption(e.target.value)
         setButton(true)
@@ -165,7 +165,7 @@ export default function ExpenseItem({ id, paymentId, title, value, detailsA, det
                                     <div className='container'>
                                         <label htmlFor="option">Forma de pagamento</label>
                                         <select onChange={handleOption} name="option" id="option">
-                                            <option value='Selecione...' hidden>Selecione...</option>
+                                            <option value={false} hidden>Selecione...</option>
                                             {debitOptions.filter(e => e.value >= parseFloat(formValue)).map(e =>
                                                 <option key={e.id} value={e.id}>{`${e.id === paymentId ? `★ ${e.name}` : `${e.name}`}  - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
                                             )}
@@ -179,8 +179,8 @@ export default function ExpenseItem({ id, paymentId, title, value, detailsA, det
                                 <RecurrencyCheckBox title={'Recorrente?'} handleRecurrent={handleRecurrent} recurrent={recurrent} />
 
                                 <div className='formButtonContainer'>
-                                    {button && parseFloat(formValue) <= maxResource &&
-                                        <ConfirmButton />
+                                    {button && option &&
+                                        < ConfirmButton />
                                     }
                                     <CancelButton handleCancel={handleEdit2} />
                                 </div>
@@ -215,9 +215,9 @@ export default function ExpenseItem({ id, paymentId, title, value, detailsA, det
                                     <div className='container'>
                                         <label htmlFor="option">Forma de pagamento</label>
                                         <select onChange={handleOption} name="option" id="option" value={option}>
-                                            <option value={paymentId}>{payment[0]}</option>
-                                            {creditOptions.filter(e => e.value >= parseFloat(formValue)).filter(e => e.id !== paymentId).map(e =>
-                                                <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                                            <option value={false} hidden>Selecione...</option>
+                                            {creditOptions.filter(e => e.value >= parseFloat(formValue)).map(e =>
+                                                <option key={e.id} value={e.id}>{`${e.id === paymentId ? `★ ${e.name}` : `${e.name}`} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
                                             )}
                                         </select>
                                     </div>
@@ -227,7 +227,7 @@ export default function ExpenseItem({ id, paymentId, title, value, detailsA, det
                                 <Inputs type={'number'} title={'Dia'} handleFunc={handleDay} name={'day'} value={day} />
 
                                 <div className='formButtonContainer'>
-                                    {button && parseFloat(formValue) <= maxCredit &&
+                                    {button && option &&
                                         <ConfirmButton />
                                     }
                                     <CancelButton handleCancel={handleEdit2} />
@@ -261,21 +261,21 @@ export default function ExpenseItem({ id, paymentId, title, value, detailsA, det
 
                                 <DoubleInput title={'Parcela atual / última'} handleA={handleCurrent} handleB={handleLast} A={'current'} B={'last'} valueA={current} valueB={last} />
 
-                                {parseFloat(useThisValue) > 0 && parseFloat(useThisValue) * parseFloat(last) <= maxCredit ?
+                                {parseFloat(formValue) > 0 && parseFloat(formValue) * parseFloat(last) <= maxCredit ?
                                     <div className='container'>
                                         <label htmlFor="option">Forma de pagamento</label>
                                         <select onChange={handleOption} name="option" id="option" value={option}>
-                                            <option value={option} hidden>{payment[0]}</option>
-                                            {creditOptions.filter(e => parseFloat(e.value) >= parseFloat(useThisValue) * parseFloat(last)).filter(e => e.id !== paymentId).map(e =>
-                                                <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                                            <option value={false} hidden>Selecione...</option>
+                                            {creditOptions.filter(e => parseFloat(e.value) >= parseFloat(formValue) * parseFloat(last)).map(e =>
+                                                <option key={e.id} value={e.id}>{`${e.id === paymentId ? `★ ${e.name}` : `${e.name}`} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
                                             )}
                                         </select>
                                     </div>
-                                    : parseFloat(useThisValue) > 0 && parseFloat(useThisValue) * parseFloat(last) ? <p className="px-10 mb-5">Você não possui opções de crédito disponíveis para este parcelamento. <Link href={'/credito'} className='font-semibold'>Confira suas opções de crédito ↗</Link></p>
+                                    : parseFloat(formValue) > 0 && parseFloat(formValue) * parseFloat(last) ? <p className="px-10 mb-5">Você não possui opções de crédito disponíveis para este parcelamento. <Link href={'/credito'} className='font-semibold'>Confira suas opções de crédito ↗</Link></p>
                                         : null
                                 }
                                 <div className='formButtonContainer'>
-                                    {button && current <= last &&
+                                    {button && current <= last && option &&
                                         <ConfirmButton />
                                     }
                                     <CancelButton handleCancel={handleEdit2} />
@@ -293,28 +293,32 @@ export default function ExpenseItem({ id, paymentId, title, value, detailsA, det
                         <ExpenseCard handleOptions={handleOptions} title={title} value={value} detailsA={detailsA} icon={pending} alt={'pagamento pendente'} />
                     }
                     {options && !remove && !edit2 && !pay2 &&
-                        <OptionsCard allOff={allOff} handleOptions={handleOptions} handleEdit2={handleEdit2} handleRemove={handleRemove} handlePay2={handlePay2} useThisValue={useThisValue} maxResource={maxResource} />
+                        <OptionsCard allOff={allOff} handleOptions={handleOptions} handleEdit2={handleEdit2} handleRemove={handleRemove} handlePay2={handlePay2} formValue={formValue} maxResource={maxResource} />
                     }
                     {!options && remove && !edit2 && !pay2 &&
                         <RemoveCard allOff={allOff} handleRemove={handleRemove} destroy={deletePending} id={id} paymentId={paymentId} formValue={formValue} type={'expense'} />
                     }
                     {!options && !remove && !edit2 && pay2 &&
-                        <div className="editFormContainer">
-                            <div className='container'>
-                                <label className='mt-5' htmlFor="option">Forma de pagamento</label>
-                                <select onChange={handleOption} name="option" id="option" value={option}>
-                                    <option defaultValue={'Selecione...'} hidden>Selecione...</option>
-                                    {debitOptions.filter(e => e.value >= parseFloat(useThisValue)).map(e =>
-                                        <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
-                                    )}
-                                </select>
-                            </div>
-                            <div className='formButtonContainer'>
-                                {button && parseFloat(useThisValue) <= maxResource &&
-                                    <ConfirmButton />
-                                }
-                                <CancelButton handleCancel={handlePay2} />
-                            </div>
+                        <div onMouseLeave={allOff} className='editFormContainer'>
+                            <form action={(formData) => {
+                                payPending(id, formData)
+                            }} onSubmit={handlePay2} className='w-full md:w-4/6 my-10'>
+                                <div className='container'>
+                                    <label htmlFor="option">Forma de pagamento</label>
+                                    <select onChange={handleOption} name="option" id="option" value={option}>
+                                        <option value={false} hidden>Selecione...</option>
+                                        {debitOptions.filter(e => e.value >= parseFloat(formValue)).map(e =>
+                                            <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                                        )}
+                                    </select>
+                                </div>
+                                <div className='formButtonContainer'>
+                                    {button && parseFloat(formValue) <= maxResource &&
+                                        <ConfirmButton />
+                                    }
+                                    <CancelButton handleCancel={handlePay2} />
+                                </div>
+                            </form>
                         </div>
                     }
                     {!options && !remove && edit2 && !pay2 &&

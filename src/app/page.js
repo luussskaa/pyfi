@@ -312,9 +312,10 @@ export default async function Home() {
             id={resource.id}
             title={resource.name}
             value={resource.value}
+            resourceOptions={JSON.parse(JSON.stringify(resources))}
             savingOptions={JSON.parse(JSON.stringify(savings))}
             expenses={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === resource.id)))}
-            totalExpenses={totalExpenses}
+            totalExpenses={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === resource.id).map(e => parseFloat(e.value)).reduce((a, b) => a + b)))}
             editResource={editResource}
             deleteResource={deleteResource}
             saveResource={saveResource}

@@ -9,7 +9,7 @@ import ConfirmButton from './forForms/ConfirmButton';
 import CancelButton from './forForms/CancelButton';
 import ExtractCard from './forItems/ExtractCard';
 
-export default function ResourceItem({ id, title, value, savingOptions, expenses, totalExpenses, editResource, deleteResource, saveResource, savings }) {
+export default function ResourceItem({ id, title, value, resourceOptions, savingOptions, expenses, totalExpenses, editResource, deleteResource, saveResource, savings }) {
 
     const useThisValue = parseFloat(value)
 
@@ -47,12 +47,21 @@ export default function ResourceItem({ id, title, value, savingOptions, expenses
         setButton(false)
     }
 
+    const [transfer, setTransfer] = useState(false)
+    const handleTransfer = () => {
+        setTransfer(!transfer)
+        setName(title)
+        setFormValue(useThisValue)
+        setButton(false)
+    }
+
     const allOff = () => {
         setOptions(false)
         setRemove(false)
         setEdit2(false)
         setExtract(false)
         setSave(false)
+        setTransfer(false)
     }
 
     const [button, setButton] = useState(false)
@@ -87,16 +96,16 @@ export default function ResourceItem({ id, title, value, savingOptions, expenses
 
     return (
         <>
-            {!options && !remove && !edit2 && !extract && !save &&
+            {!options && !remove && !edit2 && !extract && !save && !transfer &&
                 <ResourceCard handleOptions={handleOptions} title={title} value={value} expenses={expenses} />
             }
-            {options && !remove && !edit2 && !extract && !save &&
-                <OptionsCard allOff={allOff} handleOptions={handleOptions} handleRemove={handleRemove} handleEdit2={handleEdit2} handleExtract={handleExtract} expenses={expenses} handleSave={value !== 0 && handleSave} savings={savings} />
+            {options && !remove && !edit2 && !extract && !save && !transfer &&
+                <OptionsCard allOff={allOff} handleOptions={handleOptions} handleRemove={handleRemove} handleEdit2={handleEdit2} handleExtract={handleExtract} expenses={expenses} handleSave={value !== 0 && handleSave} savings={savings} handleTransfer={handleTransfer} />
             }
-            {!options && remove && !edit2 && !extract && !save &&
+            {!options && remove && !edit2 && !extract && !save && !transfer &&
                 <RemoveCard allOff={allOff} handleRemove={handleRemove} destroy={deleteResource} id={id} />
             }
-            {!options && !remove && edit2 && !extract && !save &&
+            {!options && !remove && edit2 && !extract && !save && !transfer &&
                 <div onMouseLeave={allOff} className="editFormContainer">
                     <form action={(formData) => {
                         editResource(id, formData)
@@ -115,14 +124,14 @@ export default function ResourceItem({ id, title, value, savingOptions, expenses
                     </form>
                 </div>
             }
-            {!options && !remove && !edit2 && extract && !save &&
-                <ExtractCard allOff={allOff} title={title} value={value} expenses={expenses} totalExpenses={totalExpenses} handleExtract={handleExtract} />
+            {!options && !remove && !edit2 && extract && !save && !transfer &&
+                <ExtractCard allOff={allOff} title={title} value={value} expenses={expenses} total={value + totalExpenses} handleExtract={handleExtract} />
             }
-            {!options && !remove && !edit2 && !extract && save &&
+            {!options && !remove && !edit2 && !extract && save && !transfer &&
                 <div onMouseLeave={allOff} className="editFormContainer">
                     <form action={(formData) => {
                         saveResource(id, formData)
-                    }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>
+                    }} onSubmit={handleSave} className='w-full md:w-4/6 my-10'>
 
                         <Inputs type={'number'} title={'Valor a guardar'} handleFunc={handleValue} name={'value'} value={formValue} />
 
@@ -141,6 +150,33 @@ export default function ResourceItem({ id, title, value, savingOptions, expenses
                                 <ConfirmButton />
                             }
                             <CancelButton handleCancel={handleSave} />
+                        </div>
+                    </form>
+                </div>
+            }
+            {!options && !remove && !edit2 && !extract && !save && transfer &&
+                <div onMouseLeave={allOff} className="editFormContainer">
+                    <form action={(formData) => {
+                        saveResource(id, formData)
+                    }} onSubmit={handleTransfer} className='w-full md:w-4/6 my-10'>
+
+                        <Inputs type={'number'} title={'Valor a transferir'} handleFunc={handleValue} name={'value'} value={formValue} />
+
+                        <div className='container'>
+                            <label htmlFor="option">Transferir para o recurso:</label>
+                            <select onChange={handleOption} name="option" id="option">
+                                <option defaultValue={'Selecione...'} hidden>Selecione...</option>
+                                {resourceOptions.filter(e => e.id !== id).map(e =>
+                                    <option key={e.id} value={e.id}>{`${e.name} - R$ ${(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</option>
+                                )}
+                            </select>
+                        </div>
+
+                        <div className='formButtonContainer'>
+                            {button && buttonOption && formValue <= useThisValue &&
+                                <ConfirmButton />
+                            }
+                            <CancelButton handleCancel={handleTransfer} />
                         </div>
                     </form>
                 </div>
