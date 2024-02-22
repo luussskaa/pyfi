@@ -343,19 +343,6 @@ export default function ExpenseItem({ id, paymentId, title, value, detailsA, det
                     }
                 </>
             }
-            {
-                type === 'invoice' &&
-                <div className="w-11/12 bg-neutral-900 bg-opacity-20 flex items-center mt-3 border border-neutral-500 cursor-pointer rounded-3xl duration-300 hover:bg-opacity-50 md:hover:scale-105 mx-auto shadow-md">
-                    <div className="w-28 flex flex-col justify-center items-center">
-                        <Image src={pending} width={40} height={40} />
-                        <div className="font-semibold">Dia {details}</div>
-                    </div>
-                    <div className="w-4/6">
-                        <div className="font-bold mt-5 mb-2">{title}</div>
-                        <div className="text-lg mb-5">R$ {value}</div>
-                    </div>
-                </div>
-            }
         </>
     )
 }

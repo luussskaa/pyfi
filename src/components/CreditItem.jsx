@@ -120,7 +120,7 @@ export default function CreditItem({ id, title, value, total, detailsA, expenses
                 <div onMouseLeave={allOff} className="editFormContainer">
                     <form action={(formData) => {
                         editCredit(id, formData)
-                    }} onSubmit={handleEdit2} className='w-full md:w-4/6 mt-10'>
+                    }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>
 
                         <Inputs type={'text'} title={'Apelido do cartão'} handleFunc={handleName} name={'name'} value={name} />
 
@@ -137,9 +137,9 @@ export default function CreditItem({ id, title, value, total, detailsA, expenses
                     </form>
                 </div>
             }
-            {!options && !remove && !edit2 && extract &&
+            {!options && !remove && !edit2 && extract && invoiceValues &&
                 <>
-                    <ExtractCard allOff={allOff} title={title} value={value} total={total} expenses={expenses} handleExtract={handleExtract} invoice={invoiceValues} />
+                    <ExtractCard allOff={allOff} title={title} value={value} total={total} expenses={expenses} handleExtract={handleExtract} invoice={invoiceValues.filter(e => e.type !== 'pending').length !== 0 ? invoiceValues.filter(e => e.type !== 'pending').map(e => e.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'Sem fatura'} />
                 </>
             }
         </>

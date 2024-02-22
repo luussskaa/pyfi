@@ -9,6 +9,7 @@ import Close from "@/components/Close";
 import Divider from "@/components/Divider";
 import Header from "@/components/Header";
 import { revalidatePath } from "next/cache";
+import { v4 } from "uuid";
 
 async function addResource(formData) {
 
@@ -216,28 +217,32 @@ async function endMonth(id) {
 
   const finishedMonth = await xataClient.db.CurrentMonth.filter({ userId }).getMany()
 
-  if (finishedMonth[0].year !== currentYear) {
-    if (finishedMonth[0].month === 'Dezembro') {
-      await xataClient.db.CurrentMonth.update(id, {
-        month: months[0],
-        year: currentYear
-      })
-    } else {
-      await xataClient.db.CurrentMonth.update(id, {
-        month: months[currentMonth],
-        year: currentYear
-      })
-    }
-  } else {
-    await xataClient.db.CurrentMonth.update(id, {
-      month: months[currentMonth + 1]
-    })
-  }
+  await xataClient.db.CurrentMonth.update(id, {
+    month: months[3]
+  })
 
-  const expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
+  // if (finishedMonth[0].year !== currentYear) {
+  //   if (finishedMonth[0].month === 'Dezembro') {
+  //     await xataClient.db.CurrentMonth.update(id, {
+  //       month: months[0],
+  //       year: currentYear
+  //     })
+  //   } else {
+  //     await xataClient.db.CurrentMonth.update(id, {
+  //       month: months[currentMonth],
+  //       year: currentYear
+  //     })
+  //   }
+  // } else {
+  //   await xataClient.db.CurrentMonth.update(id, {
+  //     month: months[currentMonth + 1]
+  //   })
+  // }
+
+  let expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
   const credit = await xataClient.db.Credit.filter({ userId }).getMany()
   const debitExpenses = expenses.filter(e => e.type === 'debit') // remove
-  const pendingExpenses = expenses.filter(e => e.type === 'pending') // keep and update details
+  let pendingExpenses = expenses.filter(e => e.type === 'pending') // keep and update details
   const creditExpenses = expenses.filter(e => e.type === 'credit') // sum up to invoice
   const installments = expenses.filter(e => e.type === 'installment') // update progress(details) and sum up to invoice
 
@@ -247,56 +252,72 @@ async function endMonth(id) {
     await xataClient.db.Expenses.delete(debitExpenses[i].id)
   }
 
-  for (let i = 0; i < pendingExpenses.length; i++) {
-    if (pendingExpenses[i].name.includes('(Janeiro)') || pendingExpenses[i].name.includes('(Fevereiro)') || pendingExpenses[i].name.includes('(Março)') || pendingExpenses[i].name.includes('(Abril)') || pendingExpenses[i].name.includes('(Maio)') || pendingExpenses[i].name.includes('(Junho)') || pendingExpenses[i].name.includes('(Julho)') || pendingExpenses[i].name.includes('(Agosto)') || pendingExpenses[i].name.includes('(Setembro)') || pendingExpenses[i].name.includes('(Outubro)') || pendingExpenses[i].name.includes('(Novembro)') || pendingExpenses[i].name.includes('(Dezembro)')) {
-      return
-    } else {
-      await xataClient.db.Expenses.update(pendingExpenses[i].id, {
-        name: `${pendingExpenses[i].name} (${finishedMonth[0].month})`,
-      })
-    }
-  }
-
   for (let i = 0; i < installments.length; i++) {
-    if (parseInt(installments[i].detailsA === parseInt(installments[i].detailsB))) {
+    if (installments[i].detailsA === installments[i].detailsB) {
       await xataClient.db.Expenses.delete(installments[i].id)
     } else {
       await xataClient.db.Expenses.update(installments[i].id, {
         detailsA: installments[i].detailsA + 1
       })
     }
-
-    for (let i = 0; i < invoiceExpenses.length; i++) {
-      for (let i = 0; i < credit.length; i++) {
-        if (credit[i].id === invoiceExpenses[i].paymentId) {
-          const checkInvoice = await xataClient.db.Expenses.read(credit[i].id)
-          if (checkInvoice === null) {
-            const createInvoice = await xataClient.db.Expenses.create(credit[i].id, {
-              name: `Fatura: ${credit[i].name} (${finishedMonth[0].month})`,
-              value: invoiceExpenses[i].value,
-              detailsA: credit[i].detailsA,
-              type: 'pending',
-              paymentId: credit[i].id,
-              userId
-            })
-          } else {
-            const updateInvoice = await xataClient.db.Expenses.update(credit[i].id, {
-              value: { $increment: invoiceExpenses[i].value }
-            })
-          }
-        }
-        await xataClient.db.Expenses.delete(invoiceExpenses[i].id)
-      }
-    }
-
-
-    for (let i = 0; i < creditExpenses.length; i++) {
-      await xataClient.db.Expenses.delete(creditExpenses[i].id)
-    }
-
-    redirect('/')
-
   }
+
+  const idU = v4()
+
+  for (let i = 0; i < invoiceExpenses.length; i++) {
+    for (let i = 0; i < credit.length; i++) {
+      if (credit[i].id === invoiceExpenses[i].paymentId) {
+        const checkInvoice = await xataClient.db.Expenses.read(idU)
+        if (checkInvoice === null) {
+          const createInvoice = await xataClient.db.Expenses.create({
+            id: idU,
+            name: `Fatura: ${credit[i].name}`,
+            value: invoiceExpenses[i].value,
+            detailsA: credit[i].detailsA,
+            type: 'pending',
+            paymentId: credit[i].id,
+            altered: 'toUpdate',
+            userId
+          })
+        } else if (checkInvoice !== null) {
+          const updateInvoice = await xataClient.db.Expenses.update(idU, {
+            value: { $increment: invoiceExpenses[i].value }
+          })
+        }
+      }
+      // await xataClient.db.Expenses.delete(invoiceExpenses[i].id)
+    }
+  }
+
+  // expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
+  // pendingExpenses = expenses.filter(e => e.type === 'pending')
+  // for (let i = 0; i < pendingExpenses.length; i++) {
+  //   if (pendingExpenses[i].altered === 'toUpdate') {
+  //     const updateInvoice = await xataClient.db.Expenses.update(pendingExpenses[i].id, {
+  //       id: v4()
+  //     })
+  //   }
+  // }
+
+
+  expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
+  pendingExpenses = expenses.filter(e => e.type === 'pending')
+  for (let i = 0; i < pendingExpenses.length; i++) {
+    const checkPending = await xataClient.db.Expenses.read(pendingExpenses[i].id)
+    if (checkPending !== null && checkPending.altered !== 'updated') {
+      await xataClient.db.Expenses.update(pendingExpenses[i].id, {
+        name: `${pendingExpenses[i].name} (${finishedMonth[0].month})`,
+        altered: 'updated'
+      })
+    }
+  }
+
+  for (let i = 0; i < creditExpenses.length; i++) {
+    await xataClient.db.Expenses.delete(creditExpenses[i].id)
+  }
+
+  redirect('/gastos')
+
 }
 
 

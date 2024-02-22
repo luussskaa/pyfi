@@ -95,8 +95,8 @@ export default async function page() {
                         value={credit.value}
                         total={credit.total}
                         detailsA={credit.detailsA}
-                        expenses={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === credit.id && expense.type !== 'pending')))}
-                        invoiceValues={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === credit.id && expense.type !== 'pending').map(e => e.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })))}
+                        expenses={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === credit.id)))}
+                        invoiceValues={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === credit.id)))}
                         editCredit={editCredit}
                         deleteCredit={deleteCredit} />
                 ))}
