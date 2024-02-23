@@ -8,7 +8,6 @@ import SavingCreator from "@/components/SavingCreator";
 import Close from "@/components/Close";
 import Divider from "@/components/Divider";
 import Header from "@/components/Header";
-import { revalidatePath } from "next/cache";
 import { v4 } from "uuid";
 
 async function addResource(formData) {
@@ -217,27 +216,31 @@ async function endMonth(id) {
 
   const finishedMonth = await xataClient.db.CurrentMonth.filter({ userId }).getMany()
 
-  await xataClient.db.CurrentMonth.update(id, {
-    month: months[3]
-  })
+  // await xataClient.db.CurrentMonth.update(id, {
+  //   month: months[3]
+  // })
 
-  // if (finishedMonth[0].year !== currentYear) {
-  //   if (finishedMonth[0].month === 'Dezembro') {
-  //     await xataClient.db.CurrentMonth.update(id, {
-  //       month: months[0],
-  //       year: currentYear
-  //     })
-  //   } else {
-  //     await xataClient.db.CurrentMonth.update(id, {
-  //       month: months[currentMonth],
-  //       year: currentYear
-  //     })
-  //   }
-  // } else {
-  //   await xataClient.db.CurrentMonth.update(id, {
-  //     month: months[currentMonth + 1]
-  //   })
-  // }
+  if (finishedMonth[0].year !== currentYear) {
+    if (finishedMonth[0].month === 'Dezembro') {
+      await xataClient.db.CurrentMonth.update(id, {
+        month: months[0],
+        year: currentYear
+      })
+      const previousMonths = await xataClient.db.PreviousMonths.filter({ userId }).getMany()
+      for (let i = 0; i < previousMonths.length; i++) {
+        await xataClient.db.previousMonths.delete(previousMonths[i].id)
+      }
+    } else {
+      await xataClient.db.CurrentMonth.update(id, {
+        month: months[currentMonth],
+        year: currentYear
+      })
+    }
+  } else {
+    await xataClient.db.CurrentMonth.update(id, {
+      month: months[currentMonth + 1]
+    })
+  }
 
   let expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
   const credit = await xataClient.db.Credit.filter({ userId }).getMany()
@@ -285,20 +288,8 @@ async function endMonth(id) {
           })
         }
       }
-      // await xataClient.db.Expenses.delete(invoiceExpenses[i].id)
     }
   }
-
-  // expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
-  // pendingExpenses = expenses.filter(e => e.type === 'pending')
-  // for (let i = 0; i < pendingExpenses.length; i++) {
-  //   if (pendingExpenses[i].altered === 'toUpdate') {
-  //     const updateInvoice = await xataClient.db.Expenses.update(pendingExpenses[i].id, {
-  //       id: v4()
-  //     })
-  //   }
-  // }
-
 
   expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
   pendingExpenses = expenses.filter(e => e.type === 'pending')
@@ -316,6 +307,13 @@ async function endMonth(id) {
     await xataClient.db.Expenses.delete(creditExpenses[i].id)
   }
 
+  const resources = await xataClient.db.Resources.filter({ userId }).getMany()
+  const registerMonthResultInPrevious = await xataClient.db.PreviousMonths.create({
+    name: finishedMonth[0].month,
+    value: parseFloat(resources.map(e => e.value).reduce((a, b) => a + b)),
+    userId
+  })
+
   redirect('/gastos')
 
 }
@@ -326,10 +324,23 @@ export default async function Home() {
   const { userId } = auth()
   const xataClient = getXataClient()
 
+  const getDay = new Date().getDate()
+  let showClose = false
+
+  if (getDay >= 21) {
+    showClose = true
+  }
+
   const currentMonth = await xataClient.db.CurrentMonth.filter({ userId }).getMany()
   if (currentMonth.length === 0) {
     addInitialMonth()
   }
+
+  const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+
+  const getMonth = new Date().getMonth();
+
+  const previousMonths = await xataClient.db.PreviousMonths.filter({ userId }).getMany()
 
   const resources = await xataClient.db.Resources.filter({ userId }).getMany()
   const expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
@@ -341,7 +352,17 @@ export default async function Home() {
     <>
       <Header month={currentMonth.length !== 0 && `${currentMonth[0].month} / ${currentMonth[0].year}`} title="Meu dinheiro" value={resources.length !== 0 && savings.length === 0 ? (resources.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : resources.length === 0 && savings.length !== 0 ? (savings.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : resources.length !== 0 && savings.length !== 0 ? (resources.map(e => e.value).reduce((a, b) => a + b) + savings.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'} />
 
-      <Close currentMonth={JSON.parse(JSON.stringify(currentMonth))} endMonth={endMonth} />
+      {showClose && currentMonth.name === months[getMonth + 1] &&
+        <Close currentMonth={JSON.parse(JSON.stringify(currentMonth))} endMonth={endMonth} />
+      }
+
+      {previousMonths.length !== 0 &&
+        <div className="px-10 mt-5 flex flex-wrap">
+          {previousMonths.map(e =>
+            <div key={e.id} className="font-semibold mt-2 mr-2 border border-purple-600 rounded-full py-1 px-2 text-white">{e.name.slice(0, 3)} → R$ {(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          )}
+        </div>
+      }
 
       <Divider />
 

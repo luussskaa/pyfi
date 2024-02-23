@@ -36,6 +36,14 @@ const tables = [
       { name: "userId", type: "string" }
     ],
   },
+  {
+    name: "PreviousMonths",
+    columns: [
+      { name: "name", type: "string" },
+      { name: "value", type: "float" },
+      { name: "userId", type: "string" }
+    ],
+  },
 ];
 /** @type { import('@xata.io/client').ClientConstructor<{}> } */
 const DatabaseClient = buildClient();

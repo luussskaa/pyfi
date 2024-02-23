@@ -7,6 +7,7 @@ import Link from 'next/link'
 import dinheiro from '../../public/dinheiro.png'
 import gastos from '../../public/gastos.png'
 import credito from '../../public/credito.png'
+import logo from '../../public/logo.png'
 import Image from 'next/image'
 
 export default function Sticky() {
@@ -14,10 +15,10 @@ export default function Sticky() {
     return (
         <>
             <div className='w-full md:min-w-[362px] h-20 flex justify-between items-center bg-neutral-900 bg-opacity-30 backdrop-blur-xl duration-300 max-[280px]:px-5 min-[281px]:px-10 box-border sticky top-0 mx-auto'>
-                <div>
-                    <span className='select-none text-lg'>py</span>
-                    <span className='select-none text-lg'>fi</span>
-
+                <div className='flex'>
+                    <Image src={logo} alt='dinheiro' width={20} height={20} />
+                    <span className='select-none text-lg'>pyfi</span>
+                    {/* <span className='select-none text-lg'>fi</span> */}
                 </div>
                 <div className='w-3/6 hidden md:flex mx-auto justify-between items-center'>
                     <Link href='/'>
