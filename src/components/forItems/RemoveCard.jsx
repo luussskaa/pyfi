@@ -5,7 +5,7 @@ import cancel from '../../../public/cancel.png'
 
 export default function RemoveCard({ allOff, handleRemove, destroy, id, paymentId, formValue, last, type }) {
     return (
-        <div onClick={handleRemove} onMouseLeave={allOff} className="w-11/12 h-[96px] border border-white flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 mx-auto select-none hover:scale-105">
+        <div onClick={handleRemove} className="w-11/12 h-[96px] border border-white flex justify-evenly items-center mt-3 cursor-pointer rounded-3xl duration-300 mx-auto select-none hover:scale-105">
             <div className='font-bold'>
                 Excluir?
             </div>

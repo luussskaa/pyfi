@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
       <html lang="en" className={font.className}>
         <body className='w-full min-[1281px]:w-2/6 mx-auto h-full flex-nowrap justify-center items-center bg-black text-white duration-300'>
           <Sticky title={'Meu dinheiro'} />
-          <main className="flex flex-col items-start justify-start pt-10 pb-10 mb-10 bg-black lg:shadow-md rounded-b-3xl">
+          <main className="flex flex-col items-start justify-start pt-10 pb-20 mb-5 bg-neutral-950 border border-t-0 border-neutral-800 rounded-b-3xl">
 
             {children}
           </main>

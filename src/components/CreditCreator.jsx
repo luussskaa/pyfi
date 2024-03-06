@@ -10,9 +10,11 @@ import TotalGroup from './TotalGroup'
 import Click4Options from './Click4Options'
 import FormHeading from './forForms/FormHeading'
 
-export default function CreditCreator({ addCredit, credit }) {
+export default function CreditCreator({ addCredit, credit, invoiceValues }) {
 
-    const totalLimit = credit.length !== 0 ? credit.map(e => e.total).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'
+    const totalLimitA = credit.length !== 0 ? credit.map(e => e.total).reduce((a, b) => a + b) : 0
+    const totalLimitB = invoiceValues.length !== 0 ? invoiceValues.map(e => e.value).reduce((a, b) => a + b) : 0
+    const totalLimit = (totalLimitA + totalLimitB).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
     const totalAvailable = credit.length !== 0 ? credit.map(e => e.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'
 

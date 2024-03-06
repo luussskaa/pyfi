@@ -96,7 +96,7 @@ export default function SavingItem({ id, title, value, resourceOptions, editSavi
                 <RemoveCard allOff={allOff} handleRemove={handleRemove} destroy={deleteSaving} id={id} />
             }
             {!options && !remove && edit2 && !withdraw2 &&
-                <div onMouseLeave={allOff} className="editFormContainer">
+                <div className="editFormContainer duration-300">
                     <form action={(formData) => {
                         editSaving(id, formData)
                     }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>
@@ -115,7 +115,7 @@ export default function SavingItem({ id, title, value, resourceOptions, editSavi
                 </div>
             }
             {!options && !remove && !edit2 && withdraw2 &&
-                <div className="editFormContainer">
+                <div className="editFormContainer duration-300">
                     <form action={(formData) => {
                         withdrawSaving(id, formData)
                     }} onSubmit={handleWithdraw} className="w-full md:w-4/6 my-10">

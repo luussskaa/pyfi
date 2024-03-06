@@ -9,6 +9,7 @@ import Close from "@/components/Close";
 import Divider from "@/components/Divider";
 import Header from "@/components/Header";
 import { v4 } from "uuid";
+import PreviousMonths from "@/components/PreviousMonths";
 
 async function addResource(formData) {
 
@@ -214,7 +215,7 @@ async function endMonth(id) {
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
-  const finishedMonth = await xataClient.db.CurrentMonth.filter({ userId }).getMany()
+  const finishedMonth = await xataClient.db.CurrentMonth.filter({ userId }).getAll()
 
   // await xataClient.db.CurrentMonth.update(id, {
   //   month: months[3]
@@ -226,7 +227,7 @@ async function endMonth(id) {
         month: months[0],
         year: currentYear
       })
-      const previousMonths = await xataClient.db.PreviousMonths.filter({ userId }).getMany()
+      const previousMonths = await xataClient.db.PreviousMonths.filter({ userId }).getAll()
       for (let i = 0; i < previousMonths.length; i++) {
         await xataClient.db.previousMonths.delete(previousMonths[i].id)
       }
@@ -242,12 +243,22 @@ async function endMonth(id) {
     })
   }
 
-  let expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
-  const credit = await xataClient.db.Credit.filter({ userId }).getMany()
+  let expenses = await xataClient.db.Expenses.filter({ userId }).getAll()
+  const credit = await xataClient.db.Credit.filter({ userId }).getAll()
   const debitExpenses = expenses.filter(e => e.type === 'debit') // remove
   let pendingExpenses = expenses.filter(e => e.type === 'pending') // keep and update details
   const creditExpenses = expenses.filter(e => e.type === 'credit') // sum up to invoice
   const installments = expenses.filter(e => e.type === 'installment') // update progress(details) and sum up to invoice
+
+  const resources = await xataClient.db.Resources.filter({ userId }).getAll()
+
+  const registerMonthResultInPrevious = await xataClient.db.PreviousMonths.create({
+    name: finishedMonth[0].month,
+    money: parseFloat(resources.map(e => e.value).reduce((a, b) => a + b)),
+    expenses: parseFloat(expenses.map(e => parseFloat(e.value)).reduce((a, b) => a + b)),
+    credit: parseFloat(credit.map(e => e.value).reduce((a, b) => a + b)),
+    userId
+  })
 
   const invoiceExpenses = [...creditExpenses, ...installments]
 
@@ -291,7 +302,7 @@ async function endMonth(id) {
     }
   }
 
-  expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
+  expenses = await xataClient.db.Expenses.filter({ userId }).getAll()
   pendingExpenses = expenses.filter(e => e.type === 'pending')
   for (let i = 0; i < pendingExpenses.length; i++) {
     const checkPending = await xataClient.db.Expenses.read(pendingExpenses[i].id)
@@ -307,13 +318,6 @@ async function endMonth(id) {
     await xataClient.db.Expenses.delete(creditExpenses[i].id)
   }
 
-  const resources = await xataClient.db.Resources.filter({ userId }).getMany()
-  const registerMonthResultInPrevious = await xataClient.db.PreviousMonths.create({
-    name: finishedMonth[0].month,
-    value: parseFloat(resources.map(e => e.value).reduce((a, b) => a + b)),
-    userId
-  })
-
   redirect('/gastos')
 
 }
@@ -327,11 +331,11 @@ export default async function Home() {
   const getDay = new Date().getDate()
   let showClose = false
 
-  if (getDay >= 21) {
+  if (getDay >= 25) {
     showClose = true
   }
 
-  const currentMonth = await xataClient.db.CurrentMonth.filter({ userId }).getMany()
+  const currentMonth = await xataClient.db.CurrentMonth.filter({ userId }).getAll()
   if (currentMonth.length === 0) {
     addInitialMonth()
   }
@@ -340,11 +344,11 @@ export default async function Home() {
 
   const getMonth = new Date().getMonth();
 
-  const previousMonths = await xataClient.db.PreviousMonths.filter({ userId }).getMany()
+  const previousMonths = await xataClient.db.PreviousMonths.filter({ userId }).getAll()
 
-  const resources = await xataClient.db.Resources.filter({ userId }).getMany()
-  const expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
-  const savings = await xataClient.db.Savings.filter({ userId }).getMany()
+  const resources = await xataClient.db.Resources.filter({ userId }).getAll()
+  const expenses = await xataClient.db.Expenses.filter({ userId }).getAll()
+  const savings = await xataClient.db.Savings.filter({ userId }).getAll()
 
   const totalExpenses = expenses.length !== 0 && expenses.filter(e => e.type === 'debit').length !== 0 && expenses.filter(e => e.type === 'debit').map(e => parseFloat(e.value)).reduce((a, b) => a + b)
 
@@ -359,7 +363,7 @@ export default async function Home() {
       {previousMonths.length !== 0 &&
         <div className="px-10 mt-5 flex flex-wrap">
           {previousMonths.map(e =>
-            <div key={e.id} className="font-semibold mt-2 mr-2 border border-purple-600 rounded-full py-1 px-2 text-white">{e.name.slice(0, 3)} → R$ {(e.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <PreviousMonths key={e.id} name={e.name} value={e.money} />
           )}
         </div>
       }
@@ -376,6 +380,7 @@ export default async function Home() {
             id={resource.id}
             title={resource.name}
             value={resource.value}
+            resources={JSON.parse(JSON.stringify(resources))}
             resourceOptions={JSON.parse(JSON.stringify(resources))}
             savingOptions={JSON.parse(JSON.stringify(savings))}
             expenses={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === resource.id)))}

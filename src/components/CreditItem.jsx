@@ -12,6 +12,8 @@ import CancelButton from '../components/forForms/CancelButton';
 
 export default function CreditItem({ id, title, value, total, detailsA, expenses, editCredit, deleteCredit, invoiceValues }) {
 
+    const totalInvoices = invoiceValues.length !== 0 ? invoiceValues.map(e => e.value).reduce((a, b) => a + b) : 0
+
     const useThisValue = parseFloat(total)
 
     const [options, setOptions] = useState(false)
@@ -117,7 +119,7 @@ export default function CreditItem({ id, title, value, total, detailsA, expenses
                 <RemoveCard allOff={allOff} handleRemove={handleRemove} destroy={deleteCredit} id={id} />
             }
             {!options && !remove && edit2 && !extract &&
-                <div onMouseLeave={allOff} className="editFormContainer">
+                <div className="editFormContainer duration-300">
                     <form action={(formData) => {
                         editCredit(id, formData)
                     }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>
@@ -139,7 +141,7 @@ export default function CreditItem({ id, title, value, total, detailsA, expenses
             }
             {!options && !remove && !edit2 && extract && invoiceValues &&
                 <>
-                    <ExtractCard allOff={allOff} title={title} value={value} total={total} expenses={expenses} handleExtract={handleExtract} invoice={invoiceValues.filter(e => e.type !== 'pending').length !== 0 ? invoiceValues.filter(e => e.type !== 'pending').map(e => e.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'Sem fatura'} />
+                    <ExtractCard allOff={allOff} title={title} value={value} total={total + totalInvoices} expenses={expenses} handleExtract={handleExtract} invoice={invoiceValues.filter(e => e.type !== 'pending').length !== 0 ? invoiceValues.filter(e => e.type !== 'pending').map(e => e.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'Sem fatura'} />
                 </>
             }
         </>

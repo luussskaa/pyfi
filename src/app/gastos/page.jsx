@@ -5,6 +5,7 @@ import ExpenseCreator from "@/components/ExpenseCreator";
 import { redirect } from "next/navigation";
 import Divider from "@/components/Divider";
 import Header from "@/components/Header";
+import PreviousMonths from "@/components/PreviousMonths";
 
 async function addDebit(rec, formData) {
 
@@ -318,14 +319,11 @@ async function payPending(id, formData) {
 
     const pending = await xataClient.db.Expenses.read(id)
 
-    if (pending.name.includes('Fatura:')) {
-        try {
-            await xataClient.db.Credit.update(id, {
-                value: { $increment: parseFloat(pending.value) }
-            })
-        } catch (error) {
-            return
-        }
+    try {
+        await xataClient.db.Credit.update(pending.paymentId, {
+            value: { $increment: parseFloat(pending.value) }
+        })
+    } catch (error) {
     }
 
     await xataClient.db.Resources.update(paymentId, {
@@ -346,9 +344,11 @@ export default async function page() {
     const { userId } = auth()
     const xataClient = getXataClient()
 
-    const currentMonth = await xataClient.db.CurrentMonth.filter({ userId }).getMany()
+    const currentMonth = await xataClient.db.CurrentMonth.filter({ userId }).getAll()
 
-    const exp = await xataClient.db.Expenses.filter({ userId }).getMany()
+    const previousMonths = await xataClient.db.PreviousMonths.filter({ userId }).getAll()
+
+    const exp = await xataClient.db.Expenses.filter({ userId }).getAll()
 
     const paidExpenses = exp.filter(e => e.type !== 'pending').reverse()
 
@@ -357,8 +357,8 @@ export default async function page() {
     const creditExpenses = paidExpenses.filter(e => e.type === 'credit')
     const installments = paidExpenses.filter(e => e.type === 'installment')
 
-    const resources = await xataClient.db.Resources.filter({ userId }).getMany()
-    const credit = await xataClient.db.Credit.filter({ userId }).getMany()
+    const resources = await xataClient.db.Resources.filter({ userId }).getAll()
+    const credit = await xataClient.db.Credit.filter({ userId }).getAll()
 
     const expenses = [...unpaidExpenses, ...paidExpenses]
 
@@ -371,6 +371,14 @@ export default async function page() {
     return (
         <>
             <Header month={currentMonth.length !== 0 && `${currentMonth[0].month} / ${currentMonth[0].year}`} title="Meus gastos" value={expenses.length !== 0 ? expenses.map(expense => expense.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'} />
+
+            {previousMonths.length !== 0 &&
+                <div className="px-10 mt-5 flex flex-wrap">
+                    {previousMonths.map(e =>
+                        <PreviousMonths key={e.id} name={e.name} value={e.expenses} />
+                    )}
+                </div>
+            }
 
             <Divider />
 

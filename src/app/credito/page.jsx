@@ -5,6 +5,7 @@ import CreditItem from "@/components/CreditItem";
 import CreditCreator from "@/components/CreditCreator";
 import Header from "@/components/Header";
 import Divider from "@/components/Divider";
+import PreviousMonths from "@/components/PreviousMonths";
 
 async function addCredit(formData) {
 
@@ -71,14 +72,24 @@ export default async function page() {
     const { userId } = auth()
     const xataClient = getXataClient()
 
-    const currentMonth = await xataClient.db.CurrentMonth.filter({ userId }).getMany()
+    const currentMonth = await xataClient.db.CurrentMonth.filter({ userId }).getAll()
 
-    const credit = await xataClient.db.Credit.filter({ userId }).getMany()
-    const expenses = await xataClient.db.Expenses.filter({ userId }).getMany()
+    const previousMonths = await xataClient.db.PreviousMonths.filter({ userId }).getAll()
+
+    const credit = await xataClient.db.Credit.filter({ userId }).getAll()
+    const expenses = await xataClient.db.Expenses.filter({ userId }).getAll()
 
     return (
         <>
             <Header month={currentMonth.length !== 0 && `${currentMonth[0].month} / ${currentMonth[0].year}`} title="Meu crédito" value={credit.length !== 0 ? credit.map(credit => credit.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'} />
+
+            {previousMonths.length !== 0 &&
+                <div className="px-10 mt-5 flex flex-wrap">
+                    {previousMonths.map(e =>
+                        <PreviousMonths key={e.id} name={e.name} value={e.credit} />
+                    )}
+                </div>
+            }
 
             <Divider />
 
@@ -86,6 +97,7 @@ export default async function page() {
                 <CreditCreator
                     addCredit={addCredit}
                     credit={JSON.parse(JSON.stringify(credit))}
+                    invoiceValues={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === credit.id)))}
                 />
                 {credit.length !== 0 && credit.map(credit => (
                     <CreditItem
@@ -93,7 +105,7 @@ export default async function page() {
                         id={credit.id}
                         title={credit.name}
                         value={credit.value}
-                        total={credit.total}
+                        total={credit.value}
                         detailsA={credit.detailsA}
                         expenses={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === credit.id)))}
                         invoiceValues={JSON.parse(JSON.stringify(expenses.filter(expense => expense.paymentId === credit.id)))}

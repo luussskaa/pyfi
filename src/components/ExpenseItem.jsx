@@ -251,7 +251,7 @@ export default function ExpenseItem({ id, paymentId, title, value, detailsA, det
                         <RemoveCard allOff={allOff} handleRemove={handleRemove} destroy={deleteInstallment} id={id} paymentId={paymentId} formValue={formValue} last={detailsB} type={'expense'} />
                     }
                     {!options && !remove && edit2 &&
-                        <div onMouseLeave={allOff} className='editFormContainer'>
+                        <div className='editFormContainer duration-300'>
                             <form action={(formData) => {
                                 editInstallment(id, formData, paymentId)
                             }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>
@@ -299,7 +299,7 @@ export default function ExpenseItem({ id, paymentId, title, value, detailsA, det
                         <RemoveCard allOff={allOff} handleRemove={handleRemove} destroy={deletePending} id={id} paymentId={paymentId} formValue={formValue} type={'expense'} />
                     }
                     {!options && !remove && !edit2 && pay2 &&
-                        <div onMouseLeave={allOff} className='editFormContainer'>
+                        <div className='editFormContainer duration-300'>
                             <form action={(formData) => {
                                 payPending(id, formData)
                             }} onSubmit={handlePay2} className='w-full md:w-4/6 my-10'>
@@ -322,7 +322,7 @@ export default function ExpenseItem({ id, paymentId, title, value, detailsA, det
                         </div>
                     }
                     {!options && !remove && edit2 && !pay2 &&
-                        <div onMouseLeave={allOff} className='editFormContainer'>
+                        <div className='editFormContainer duration-300'>
                             <form action={(formData) => {
                                 editPending(id, formData)
                             }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>
