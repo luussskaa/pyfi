@@ -1,8 +1,6 @@
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import Navbar from "@/components/Navbar";
-import Sticky from "@/components/Sticky";
 
 const font = Montserrat({ subsets: ["latin"] });
 
@@ -15,29 +13,10 @@ export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
       <html lang="en" className={font.className}>
-        <body className='w-full min-[1281px]:w-2/6 mx-auto h-full flex-nowrap justify-center items-center bg-black text-white duration-300'>
-          <Sticky title={'Meu dinheiro'} />
-          <main className="flex flex-col items-start justify-start pt-10 pb-20 mb-5 bg-neutral-950 border border-t-0 border-neutral-800 rounded-b-3xl">
-
-            {children}
-          </main>
-          <Navbar />
+        <body className="bg-black flex flex-col justify-center items-center">
+          {children}
         </body>
       </html>
     </ClerkProvider>
   );
 }
-
-// return (
-//   <ClerkProvider>
-//     <html lang="en" className={font.className}>
-//       <body className='w-full min-[1281px]:w-2/6 mx-auto h-full flex-nowrap justify-center items-center bg-gradient-to-r from-[#4B2B40] to-[#1F3B57] text-white duration-300'>
-//         <Sticky title={'Meu dinheiro'} />
-//         <main className="flex flex-col items-start justify-center md:mt-10 md:pb-10 md:pt-10 pb-32 lg:w-[640px] lg:h-[680px] overflow-y-scroll md:bg-neutral-800 md:bg-opacity-30 md:shadow-md md:shadow-neutral-900 md:rounded-3xl md:border md:border-x-neutral-600 md:border-neutral-600">
-//           {children}
-//         </main>
-//         <Navbar />
-//       </body>
-//     </html>
-//   </ClerkProvider>
-// );

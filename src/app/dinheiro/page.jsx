@@ -9,7 +9,11 @@ import Close from "@/components/Close";
 import Divider from "@/components/Divider";
 import Header from "@/components/Header";
 import { v4 } from "uuid";
-import PreviousMonths from "@/components/PreviousMonths";
+import PreviousMonths from "@/components/PreviousMonthsItem";
+import ChartBar from "@/components/ChartBar";
+import ChartContainer from "@/components/ChartContainer";
+import PreviousMonthsItem from "@/components/PreviousMonthsItem";
+import PreviousMonthsContainer from "@/components/PreviousMonthsContainer";
 
 async function addResource(formData) {
 
@@ -323,7 +327,7 @@ async function endMonth(id) {
 }
 
 
-export default async function Home() {
+export default async function Page() {
 
   const { userId } = auth()
   const xataClient = getXataClient()
@@ -347,25 +351,24 @@ export default async function Home() {
   const previousMonths = await xataClient.db.PreviousMonths.filter({ userId }).getAll()
 
   const resources = await xataClient.db.Resources.filter({ userId }).getAll()
-  const expenses = await xataClient.db.Expenses.filter({ userId }).getAll()
   const savings = await xataClient.db.Savings.filter({ userId }).getAll()
 
-  const totalExpenses = expenses.length !== 0 && expenses.filter(e => e.type === 'debit').length !== 0 && expenses.filter(e => e.type === 'debit').map(e => parseFloat(e.value)).reduce((a, b) => a + b)
+  const expenses = await xataClient.db.Expenses.filter({ userId }).getAll()
 
   return (
     <>
-      <Header month={currentMonth.length !== 0 && `${currentMonth[0].month} / ${currentMonth[0].year}`} title="Meu dinheiro" value={resources.length !== 0 && savings.length === 0 ? (resources.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : resources.length === 0 && savings.length !== 0 ? (savings.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : resources.length !== 0 && savings.length !== 0 ? (resources.map(e => e.value).reduce((a, b) => a + b) + savings.map(e => e.value).reduce((a, b) => a + b)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'} />
+      <Header currentMonth={currentMonth[0]} resources={JSON.parse(JSON.stringify(resources))} savings={JSON.parse(JSON.stringify(savings))} page={'dinheiro'} />
 
       {showClose && currentMonth.name === months[getMonth + 1] &&
         <Close currentMonth={JSON.parse(JSON.stringify(currentMonth))} endMonth={endMonth} />
       }
 
       {previousMonths.length !== 0 &&
-        <div className="px-10 mt-5 flex flex-wrap">
-          {previousMonths.map(e =>
-            <PreviousMonths key={e.id} name={e.name} value={e.money} />
-          )}
-        </div>
+        <ChartContainer previousMonths={JSON.parse(JSON.stringify(previousMonths))} resources={JSON.parse(JSON.stringify(resources))} savings={JSON.parse(JSON.stringify(savings))} currentMonth={currentMonth} page={'dinheiro'} />
+      }
+
+      {previousMonths.length !== 0 &&
+        <PreviousMonthsContainer previousMonths={JSON.parse(JSON.stringify(previousMonths))} />
       }
 
       <Divider />

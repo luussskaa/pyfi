@@ -5,7 +5,9 @@ import CreditItem from "@/components/CreditItem";
 import CreditCreator from "@/components/CreditCreator";
 import Header from "@/components/Header";
 import Divider from "@/components/Divider";
-import PreviousMonths from "@/components/PreviousMonths";
+import PreviousMonths from "@/components/PreviousMonthsItem";
+import ChartContainer from "@/components/ChartContainer";
+import PreviousMonthsContainer from "@/components/PreviousMonthsContainer";
 
 async function addCredit(formData) {
 
@@ -67,7 +69,7 @@ async function deleteCredit(id) {
 
 }
 
-export default async function page() {
+export default async function Page() {
 
     const { userId } = auth()
     const xataClient = getXataClient()
@@ -81,14 +83,14 @@ export default async function page() {
 
     return (
         <>
-            <Header month={currentMonth.length !== 0 && `${currentMonth[0].month} / ${currentMonth[0].year}`} title="Meu crédito" value={credit.length !== 0 ? credit.map(credit => credit.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'} />
+            <Header currentMonth={currentMonth[0]} credit={JSON.parse(JSON.stringify(credit))} page={'credito'} />
 
             {previousMonths.length !== 0 &&
-                <div className="px-10 mt-5 flex flex-wrap">
-                    {previousMonths.map(e =>
-                        <PreviousMonths key={e.id} name={e.name} value={e.credit} />
-                    )}
-                </div>
+                <ChartContainer previousMonths={JSON.parse(JSON.stringify(previousMonths))} credit={JSON.parse(JSON.stringify(credit))} currentMonth={currentMonth} page={'credito'} />
+            }
+
+            {previousMonths.length !== 0 &&
+                <PreviousMonthsContainer previousMonths={JSON.parse(JSON.stringify(previousMonths))} />
             }
 
             <Divider />

@@ -119,7 +119,7 @@ export default function CreditItem({ id, title, value, total, detailsA, expenses
                 <RemoveCard allOff={allOff} handleRemove={handleRemove} destroy={deleteCredit} id={id} />
             }
             {!options && !remove && edit2 && !extract &&
-                <div className="editFormContainer duration-300">
+                <div className="editFormContainer hover:my-10 duration-300">
                     <form action={(formData) => {
                         editCredit(id, formData)
                     }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>

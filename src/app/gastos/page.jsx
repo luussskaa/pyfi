@@ -5,7 +5,9 @@ import ExpenseCreator from "@/components/ExpenseCreator";
 import { redirect } from "next/navigation";
 import Divider from "@/components/Divider";
 import Header from "@/components/Header";
-import PreviousMonths from "@/components/PreviousMonths";
+import PreviousMonths from "@/components/PreviousMonthsItem";
+import ChartContainer from "@/components/ChartContainer";
+import PreviousMonthsContainer from "@/components/PreviousMonthsContainer";
 
 async function addDebit(rec, formData) {
 
@@ -339,7 +341,7 @@ async function payPending(id, formData) {
 
 }
 
-export default async function page() {
+export default async function Page() {
 
     const { userId } = auth()
     const xataClient = getXataClient()
@@ -370,14 +372,14 @@ export default async function page() {
 
     return (
         <>
-            <Header month={currentMonth.length !== 0 && `${currentMonth[0].month} / ${currentMonth[0].year}`} title="Meus gastos" value={expenses.length !== 0 ? expenses.map(expense => expense.value).reduce((a, b) => a + b).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'} />
+            <Header currentMonth={currentMonth[0]} expenses={JSON.parse(JSON.stringify(expenses))} page={'gastos'} />
 
             {previousMonths.length !== 0 &&
-                <div className="px-10 mt-5 flex flex-wrap">
-                    {previousMonths.map(e =>
-                        <PreviousMonths key={e.id} name={e.name} value={e.expenses} />
-                    )}
-                </div>
+                <ChartContainer previousMonths={JSON.parse(JSON.stringify(previousMonths))} expenses={JSON.parse(JSON.stringify(expenses))} currentMonth={currentMonth} page={'gastos'} />
+            }
+
+            {previousMonths.length !== 0 &&
+                <PreviousMonthsContainer previousMonths={JSON.parse(JSON.stringify(previousMonths))} />
             }
 
             <Divider />

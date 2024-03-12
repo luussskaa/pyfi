@@ -22,8 +22,8 @@ export default function Sticky() {
                     <span className='select-none text-lg'>pyfi</span>
                 </div>
                 <div className='w-3/6 hidden md:flex mx-auto justify-between items-center'>
-                    <Link href='/'>
-                        {pathname === '/' ?
+                    <Link href='/dinheiro'>
+                        {pathname === '/dinheiro' ?
                             <Image src={dinheiro} alt='dinheiro' width={40} height={40} className='invert opacity-100 duration-300' />
                             :
                             <Image src={dinheiro} alt='dinheiro' width={40} height={40} className='invert opacity-30 hover:opacity-100 duration-300' />

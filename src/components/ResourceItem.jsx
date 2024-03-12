@@ -106,7 +106,7 @@ export default function ResourceItem({ id, title, value, resources, resourceOpti
                 <RemoveCard allOff={allOff} handleRemove={handleRemove} destroy={deleteResource} id={id} />
             }
             {!options && !remove && edit2 && !extract && !save && !transfer &&
-                <div className="editFormContainer duration-300">
+                <div className="editFormContainer hover:my-10 duration-300">
                     <form action={(formData) => {
                         editResource(id, formData)
                     }} onSubmit={handleEdit2} className='w-full md:w-4/6 my-10'>
@@ -128,7 +128,7 @@ export default function ResourceItem({ id, title, value, resources, resourceOpti
                 <ExtractCard allOff={allOff} title={title} value={value} expenses={expenses} total={value + totalExpenses} handleExtract={handleExtract} invoice={'débito'} />
             }
             {!options && !remove && !edit2 && !extract && save && !transfer &&
-                <div className="editFormContainer duration-300">
+                <div className="editFormContainer hover:my-10 duration-300">
                     <form action={(formData) => {
                         saveResource(id, formData)
                     }} onSubmit={handleSave} className='w-full md:w-4/6 my-10'>
@@ -155,7 +155,7 @@ export default function ResourceItem({ id, title, value, resources, resourceOpti
                 </div>
             }
             {!options && !remove && !edit2 && !extract && !save && transfer &&
-                <div className="editFormContainer duration-300">
+                <div className="editFormContainer hover:my-10 duration-300">
                     <form action={(formData) => {
                         transferResource(id, formData)
                     }} onSubmit={handleTransfer} className='w-full md:w-4/6 my-10'>
