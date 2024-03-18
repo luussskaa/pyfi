@@ -379,7 +379,7 @@ export default async function Page() {
             }
 
             {previousMonths.length !== 0 &&
-                <PreviousMonthsContainer previousMonths={JSON.parse(JSON.stringify(previousMonths))} />
+                <PreviousMonthsContainer previousMonths={JSON.parse(JSON.stringify(previousMonths))} page={'gastos'} />
             }
 
             <Divider />
